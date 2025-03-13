@@ -1,0 +1,17 @@
+<div class="news-card animate__animated animate__fadeInUp">
+    <div class="card-image">
+        <img src="{{ noticia.imagen }}" alt="{{ noticia.titulo }}">
+    </div>
+    <div class="card-content">
+        <h3 class="card-title">{{ noticia.titulo }}</h3>
+        <p class="card-text">{{ noticia.descripcion }}</p>
+        <div class="card-meta">
+            <span class="badge bg-success">
+                <i class="fas fa-calendar-day me-2"></i>{{ noticia.fecha|date('d/m/Y') }}
+            </span>
+            <span class="text-muted">
+                <i class="fas fa-tags me-2"></i>{{ noticia.categoria }}
+            </span>
+        </div>
+    </div>
+</div>
