@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+    <h1>Perfil de Usuario</h1>
+
+    <p><strong>Nombre:</strong> {{ usuario.nombre }}</p>
+    <p><strong>Correo:</strong> {{ usuario.correo }}</p>
+    <p><strong>Tipo de usuario:</strong> {{ usuario.tipo_usuario  }}</p>
+
+
+    <form method="POST" action="">
+        <button type="submit">Cerrar sesión</button>
+    </form>
+
+{% endblock %}

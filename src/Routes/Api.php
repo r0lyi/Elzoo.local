@@ -1,52 +1,55 @@
 <?php
 namespace Elzoo\Routes;
 
-use Elzoo\Controllers\AnimalesController;
+use Elzoo\Controllers\NoticiaController;
+use Elzoo\Core\Response;
 
 class Api {
     public static function handleApiRequest($method, $uri) {
-        // Normalizar la URI (quitar barras iniciales y finales)
-        $uri = trim($uri, '/');
+        // Rutas de la API
+        $apiRoutes = [
+            '/api/noticias' => [
+                'GET' => function () {
+                    $controller = new NoticiaController();
+                    $controller->getAll();
+                },
+                'POST' => function () {
+                    $controller = new NoticiaController();
+                    $controller->create();
+                },
+            ],
+            '/api/noticias/{id}' => [
+                'GET' => function ($id) {
+                    $controller = new NoticiaController();
+                    $controller->getById($id);
+                },
+                'PUT' => function ($id) {
+                    $controller = new NoticiaController();
+                    $controller->update($id);
+                },
+                'DELETE' => function ($id) {
+                    $controller = new NoticiaController();
+                    $controller->delete($id);
+                },
+            ],
+        ];
 
-        // Instanciar controladores necesarios
-        //$animalesController = new AnimalesController();
+        // Manejo de rutas API
+        foreach ($apiRoutes as $route => $methods) {
+            if (preg_match('/^\/api\/noticias(?:\/(\d+))?$/', $uri, $matches)) {
+                $id = $matches[1] ?? null;
 
-        // Manejar rutas de la API
-        switch (true) {
-            // GET /api/animales - Lista todos los animales
-        /*    case ($method === 'GET' && $uri === 'api/animales'):
-                $animalesController->getAllAnimals();
-                break;
-
-            // POST /api/animales - Crear un nuevo animal
-            case ($method === 'POST' && $uri === 'api/animales'):
-                $animalesController->createAnimal();
-                break;
-
-            // GET /api/animales/{id} - Obtener un animal por ID
-            case ($method === 'GET' && preg_match('/^api\/animales\/\d+$/', $uri)):
-                $id = basename($uri);
-                $animalesController->getAnimalById($id);
-                break;
-
-            // PUT /api/animales/{id} - Actualizar un animal
-            case ($method === 'PUT' && preg_match('/^api\/animales\/\d+$/', $uri)):
-                $id = basename($uri);
-                $animalesController->updateAnimal($id);
-                break;
-
-            // DELETE /api/animales/{id} - Eliminar un animal
-            case ($method === 'DELETE' && preg_match('/^api\/animales\/\d+$/', $uri)):
-                $id = basename($uri);
-                $animalesController->deleteAnimal($id);
-                break;                  */
-
-            // Ruta no encontrada
-            default:
-                header('Content-Type: application/json');
-                http_response_code(404);
-                echo json_encode(['message' => 'Ruta no encontrada']);
-                break;
+                if (array_key_exists($method, $methods)) {
+                    $methods[$method]($id);
+                    return;
+                } else {
+                    Response::error('Método no permitido', 405);
+                    return;
+                }
+            }
         }
+
+        // Si no se encuentra la ruta
+        Response::error('Ruta no encontrada', 404);
     }
 }
