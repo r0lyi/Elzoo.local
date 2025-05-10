@@ -1,0 +1,12 @@
+# Habilitar el motor de reescritura
+RewriteEngine On
+
+# Establecer la base para la API
+RewriteBase /api/public/
+
+# Excluir solicitudes para archivos o directorios existentes en api/public/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Redirigir todas las demás solicitudes de la API a index.php
+RewriteRule ^(.*)$ index.php [L,QSA]
