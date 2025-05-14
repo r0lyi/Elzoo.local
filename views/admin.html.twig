@@ -1,0 +1,275 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center text-uppercase mb-4 animate__animated animate__fadeInDown">
+        <i class="fas fa-user-shield"></i> Panel de Administración
+    </h2>
+    
+    <div class="accordion" id="adminAccordion">
+        <!-- Gestión de Usuarios -->
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#usuarios">
+                    <i class="fas fa-users"></i> Gestión de Usuarios
+                </button>
+            </h2>
+            <div id="usuarios" class="accordion-collapse collapse show">
+                <div class="accordion-body">
+                    <form id="userForm" class="mb-3">
+                        <input type="hidden" id="userId">
+                        <div class="mb-2">
+                            <label for="userName">Nombre:</label>
+                            <input type="text" id="userName" class="form-control" required>
+                        </div>
+                        <div class="mb-2">
+                            <label for="userEmail">Correo:</label>
+                            <input type="email" id="userEmail" class="form-control" required>
+                        </div>
+                        <div class="mb-2">
+                            <label for="userRole">Rol:</label>
+                            <select id="userRole" class="form-select">
+                                <option value="usuario">Usuario</option>
+                                <option value="administrador">Administrador</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-success" id="userSaveButton">Guardar</button>
+                        <button type="button" class="btn btn-secondary" id="userCancelButton" style="display:none;">Cancelar</button>
+                    </form>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Rol</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userList"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gestión de Animales -->
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#animales">
+                    <i class="fas fa-paw"></i> Gestión de Animales
+                </button>
+            </h2>
+            <div id="animales" class="accordion-collapse collapse">
+                <div class="accordion-body">
+                    <form id="animalForm" class="mb-3">
+                        <input type="hidden" id="animalId">
+                        <div class="mb-2">
+                            <label for="animalSpecies">Especie:</label>
+                            <input type="text" id="animalSpecies" class="form-control" required>
+                        </div>
+                        <div class="mb-2">
+                            <label for="animalImage">URL Imagen:</label>
+                            <input type="text" id="animalImage" class="form-control">
+                        </div>
+                        <button type="submit" class="btn btn-success">Guardar</button>
+                    </form>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Especie</th>
+                                <th>Imagen</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="animalList"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gestión de Publicaciones en el Foro -->
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#foro">
+                    <i class="fas fa-comments"></i> Gestión de Publicaciones en el Foro
+                </button>
+            </h2>
+            <div id="foro" class="accordion-collapse collapse">
+                <div class="accordion-body">
+                    <form id="forumForm" class="mb-3">
+                        <input type="hidden" id="forumId">
+                        <div class="mb-2">
+                            <label for="forumTitle">Título:</label>
+                            <input type="text" id="forumTitle" class="form-control" required>
+                        </div>
+                        <div class="mb-2">
+                            <label for="forumContent">Contenido:</label>
+                            <textarea id="forumContent" class="form-control" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success">Guardar</button>
+                    </form>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Título</th>
+                                <th>Contenido</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="forumList"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gestión de Noticias -->
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#noticias">
+                    <i class="fas fa-newspaper"></i> Gestión de Noticias
+                </button>
+            </h2>
+            <div id="noticias" class="accordion-collapse collapse">
+                <div class="accordion-body">
+                    <form id="newsForm" class="mb-3">
+                        <input type="hidden" id="newsId">
+                        <div class="mb-2">
+                            <label for="newsTitle">Titular:</label>
+                            <input type="text" id="newsTitle" class="form-control" required>
+                        </div>
+                        <div class="mb-2">
+                            <label for="newsDescription">Descripción:</label>
+                            <textarea id="newsDescription" class="form-control" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success">Guardar</button>
+                    </form>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Titular</th>
+                                <th>Descripción</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="newsList"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ------------------------
+    // Funciones para Usuarios
+    // ------------------------
+    async function loadUsers() {
+        try {
+            const response = await fetch('/api/admin/usuarios');
+            if (!response.ok) throw new Error('Error al cargar usuarios');
+            const users = await response.json();
+            const userList = document.getElementById("userList");
+            userList.innerHTML = "";
+            users.forEach(user => {
+                userList.innerHTML += `
+                    <tr>
+                        <td>${user.id}</td>
+                        <td>${user.nombre}</td>
+                        <td>${user.correo}</td>
+                        <td>${user.tipo_usuario}</td>
+                        <td>
+                            <button class="btn btn-warning btn-sm" onclick="editUser(${user.id}, '${user.nombre}', '${user.correo}', '${user.tipo_usuario}')">Editar</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteUser(${user.id})">Eliminar</button>
+                        </td>
+                    </tr>`;
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    async function createUser(data) {
+        try {
+            const response = await fetch('/api/admin/usuarios', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (!response.ok) throw new Error('Error al crear usuario');
+            return await response.json();
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    async function updateUser(id, data) {
+        try {
+            const response = await fetch(`/api/admin/usuarios/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (!response.ok) throw new Error('Error al actualizar usuario');
+            return await response.json();
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    async function deleteUser(id) {
+        if (!confirm("¿Estás seguro de eliminar este usuario?")) return;
+        try {
+            const response = await fetch(`/api/admin/usuarios/${id}`, { method: 'DELETE' });
+            if (!response.ok) throw new Error('Error al eliminar usuario');
+            await loadUsers();
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    function editUser(id, nombre, correo, tipo_usuario) {
+        document.getElementById("userId").value = id;
+        document.getElementById("userName").value = nombre;
+        document.getElementById("userEmail").value = correo;
+        document.getElementById("userRole").value = tipo_usuario;
+        document.getElementById("userSaveButton").textContent = "Actualizar";
+        document.getElementById("userCancelButton").style.display = "inline-block";
+    }
+
+    document.getElementById("userForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
+        const id = document.getElementById("userId").value;
+        const data = {
+            nombre: document.getElementById("userName").value,
+            correo: document.getElementById("userEmail").value,
+            tipo_usuario: document.getElementById("userRole").value
+        };
+        if (id) {
+            await updateUser(id, data);
+        } else {
+            await createUser(data);
+        }
+        document.getElementById("userForm").reset();
+        document.getElementById("userSaveButton").textContent = "Guardar";
+        document.getElementById("userCancelButton").style.display = "none";
+        loadUsers();
+    });
+
+    document.getElementById("userCancelButton").addEventListener("click", function() {
+        document.getElementById("userForm").reset();
+        document.getElementById("userSaveButton").textContent = "Guardar";
+        document.getElementById("userCancelButton").style.display = "none";
+    });
+
+    // Inicializar carga de usuarios
+    loadUsers();
+
+    // -------------------------------
+    // Aquí puedes agregar funciones similares
+    // para "Animales", "Foro" y "Noticias"
+    // -------------------------------
+</script>
+{% endblock %}

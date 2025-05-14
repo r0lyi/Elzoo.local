@@ -1,44 +1,91 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Inicio - Mi Sitio Web{% endblock %}
+{% block title %}Inicio - Noticias del Zoológico{% endblock %}
 
 {% block content %}
-    <h1 class="text-center">Bienvenido a nuestro zoológico</h1>
-    <p class="text-center">Explora nuestras secciones para obtener más información.</p>
+<div class="container mt-5">
+    <header class="text-center mb-4 animate__animated animate__fadeInDown">
+        <h1 class="fw-bold">Bienvenido a nuestro Zoológico</h1>
+        <p class="lead">Descubre las últimas noticias y actualizaciones sobre el reino animal.</p>
+    </header>
 
-    <h2 class="text-center my-4">Últimas Noticias</h2>
-
-    <div class="noticia-container">
-
-        {% if noticias is empty %}
-            <p class="text-center">No hay noticias disponibles por ahora.</p>
-        {% else %}
-            {% for noticia in noticias %}
-                <div class="noticia mb-4">
-                    <h3>{{ noticia.titulo }}</h3>
-                    <p class="text-muted">
-                        Publicado el {{ noticia.fecha_publicacion|date('d/m/Y H:i') }}
-                        {% if noticia.autor_id %} por el autor #{{ noticia.autor_id }}{% endif %}
-                    </p>
-                    <p>{{ noticia.descripcion }}</p>
-
-                    {% if noticia.imagen %}
-                        <div class="text-center">
-                            <img src="{{ noticia.imagen }}" alt="Imagen de {{ noticia.titulo }}" style="max-width: 100%; height: auto;">
-                        </div>
-                    {% else %}
-                        <p><em>No hay imagen disponible.</em></p>
-                    {% endif %}
-
-                    <p>
-                        <a href="{{ noticia.url_origen }}" target="_blank" rel="noopener noreferrer">
-                            Leer noticia original
+    <section class="latest-news">
+        <h2 class="text-center mb-4 animate__animated animate__zoomIn">Últimas Noticias</h2>
+        
+        {% for noticia in noticias %}
+    <div class="col-sm-12 col-md-6 col-lg-4 mb-4 animate__animated animate__fadeInUp" style="animation-delay: {{ loop.index * 0.2 }}s">
+        <div class="card h-100 shadow-sm">
+            <img src="{{ noticia.imagen ?: '/path/to/default-image.jpg' }}" class="card-img-top img-fluid" alt="Imagen de {{ noticia.titulo }}">
+            <div class="card-body d-flex flex-column justify-content-between">
+                <div>
+                    <h5 class="card-title">
+                        <a href="{{ noticia.url_origen }}" target="_blank" class="text-decoration-none text-success">
+                            {{ noticia.titulo }}
                         </a>
+                    </h5>
+                    <p class="card-text text-highlight">
+                        🐾 {{ noticia.descripcion|length > 500 ? noticia.descripcion[:200] ~ '...' : noticia.descripcion }}
                     </p>
                 </div>
-                <hr>
-            {% endfor %}
-        {% endif %}
-
+                <div class="mt-3">
+                    <p class="text-muted mb-1"><i class="bi bi-calendar-event"></i> Publicado el: {{ noticia.fecha_publicacion|date("d/m/Y") }}</p>
+                    {# Si deseas mostrar el autor y tienes el nombre, reemplaza el siguiente texto por la propiedad adecuada #}
+                    {# <p class="text-muted"><i class="bi bi-person-circle"></i> Autor: {{ noticia.autor.nombre }}</p> #}
+                </div>
+            </div>
+        </div>
     </div>
+{% endfor %}
+            <p class="text-center animate__animated animate__fadeInUp">No hay noticias disponibles en este momento.</p>
+    </section>
+</div>
+
+<style>
+    body {
+        background-color: #eef7e9;
+    }
+
+    .card {
+        border-radius: 15px;
+        overflow: hidden;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-img-top {
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .card-title {
+        color: #2c5f2d;
+        font-weight: bold;
+    }
+
+    .text-highlight {
+        background-color: #fff6e0;
+        padding: 10px;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: bold;
+        color: #4b5320;
+    }
+
+    @media (max-width: 576px) {
+        h1 {
+            font-size: 1.8rem;
+        }
+        .text-highlight {
+            font-size: 0.9rem;
+            padding: 8px;
+        }
+        .card-img-top {
+            height: 150px;
+        }
+    }
+</style>
 {% endblock %}

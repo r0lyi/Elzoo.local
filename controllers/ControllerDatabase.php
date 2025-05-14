@@ -1,7 +1,5 @@
 <?php
-namespace Controllers;
-use PDO;
-use PDOException;
+
 // Clase Singleton para la conexión a la base de datos
 class ControllerDatabase {
 

@@ -12,7 +12,27 @@ switch ($request) {
     case '/home':
         require_once $controllerDir . 'ControllerHome.php';
         break;
-
+    case '/register':
+        require_once $controllerDir. 'ControllerRegister.php';
+        break;
+    case '/login':
+        require_once $controllerDir . 'ControllerLogin.php';
+        break;
+    case '/perfil':
+        require_once $controllerDir . 'ControllerPerfil.php';
+        break;
+    case '/species_list':
+        require_once $controllerDir . 'ControllerList.php';
+        break;
+    case '/admin':
+        require_once $controllerDir . 'ControllerAdmin.php';
+        break;
+    case '/forum':
+        require_once $controllerDir . 'ControllerForo.php';
+        break;
+    case '/adopcion':
+        require_once $controllerDir . 'ControllerAdopcion.php';
+        break;
     // Puedes descomentar y adaptar según tus necesidades
     /*
     case '/species_list':

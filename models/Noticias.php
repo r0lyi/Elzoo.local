@@ -1,11 +1,5 @@
 <?php
-
-namespace Models;
-
-use Controllers\ControllerDatabase;
-use PDO;
-
-require_once __DIR__ . '/../controllers/ControllerDatabase.php';
+include_once __DIR__ . '/../controllers/ControllerDatabase.php';
 
 class Noticias {
     // Atributos
@@ -54,10 +48,9 @@ class Noticias {
     public function setImagen($imagen) { $this->imagen = $imagen; }
     public function setAutorId($autor_id) { $this->autor_id = $autor_id; }
 
-    // Obtener todas las noticias
-    public static function getNoticias() {
+    // Obtener una lista de todas las noticias como objetos
+    public static function listNoticias() {
         $db = ControllerDatabase::connect();
-
         if ($db === null) {
             return [];
         }
@@ -66,19 +59,86 @@ class Noticias {
         $noticiasData = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         $noticias = [];
-        foreach ($noticiasData as $data) {
-            $noticia = new self(
-                $data['id'],
-                $data['titulo'],
-                $data['descripcion'],
-                $data['fecha_publicacion'],
-                $data['url_origen'],
-                $data['imagen'],
-                $data['autor_id']
+        foreach ($noticiasData as $noticiaData) {
+            $noticia = new Noticias(
+                $noticiaData['id'],
+                $noticiaData['titulo'],
+                $noticiaData['descripcion'],
+                $noticiaData['fecha_publicacion'],
+                $noticiaData['url_origen'],
+                $noticiaData['imagen'],
+                $noticiaData['autor_id']
             );
             $noticias[] = $noticia;
         }
 
         return $noticias;
+    }
+
+    // Buscar una noticia por ID y devolver como array
+    public static function find($id) {
+        $connection = ControllerDatabase::connect();
+        $query = "SELECT * FROM noticias WHERE id = ?";
+        $stmt = $connection->prepare($query);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // Buscar todas las noticias como array (alternativa a listNoticias)
+    public static function findAll() {
+        $connection = ControllerDatabase::connect();
+        $query = "SELECT * FROM noticias ORDER BY fecha_publicacion DESC";
+        $stmt = $connection->query($query);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Alias para compatibilidad
+    public static function getNoticias() {
+        return self::findAll();
+    }
+
+    // Crear una nueva noticia
+    public static function create($data) {
+        $connection = ControllerDatabase::connect();
+        $query = "INSERT INTO noticias (titulo, descripcion, fecha_publicacion, url_origen, imagen, autor_id)
+                  VALUES (?, ?, ?, ?, ?, ?)";
+        $stmt = $connection->prepare($query);
+        $result = $stmt->execute([
+            $data['titulo'],
+            $data['descripcion'],
+            $data['fecha_publicacion'],
+            $data['url_origen'],
+            $data['imagen'],
+            $data['autor_id']
+        ]);
+        if ($result) {
+            return $connection->lastInsertId();
+        }
+        return false;
+    }
+
+    // Actualizar una noticia existente
+    public static function update($id, $data) {
+        $connection = ControllerDatabase::connect();
+        $query = "UPDATE noticias SET titulo = ?, descripcion = ?, fecha_publicacion = ?, url_origen = ?, imagen = ?, autor_id = ?
+                  WHERE id = ?";
+        $stmt = $connection->prepare($query);
+        return $stmt->execute([
+            $data['titulo'],
+            $data['descripcion'],
+            $data['fecha_publicacion'],
+            $data['url_origen'],
+            $data['imagen'],
+            $data['autor_id'],
+            $id
+        ]);
+    }
+
+    // Eliminar una noticia por ID
+    public static function delete($id) {
+        $connection = ControllerDatabase::connect();
+        $query = "DELETE FROM noticias WHERE id = ?";
+        $stmt = $connection->prepare($query);
+        return $stmt->execute([$id]);
     }
 }

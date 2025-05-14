@@ -1,7 +1,6 @@
 <?php
-namespace Models;
 
-include_once __DIR__ . '/../controllers/ControllerDatabase.php';
+require_once __DIR__ . '/../controllers/ControllerDatabase.php';
 
 class Animales {
     private $id;

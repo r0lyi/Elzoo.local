@@ -6,9 +6,9 @@ require_once __DIR__ . '/../controllers/ControllerTwig.php';
 require_once __DIR__ . '/../models/Noticias.php';
 
 
-function home() {
+function adopcion() {
     $jwt = getAuthCookie();
-    $noticias = Noticias::listNoticias();
+    $noticias = Noticias::getNoticias();
     $isAuthenticated = false;
 
     if ($jwt && verificarJWT($jwt, 'mi_clave_secreta')) {
@@ -17,11 +17,10 @@ function home() {
         deleteAuthCookie(); // Elimina la cookie si el token es inválido
     }
 
-    renderView('home.html.twig', [
+    renderView('adopcion.html.twig', [
         'noticias' => $noticias,
         'is_authenticated' => $isAuthenticated
     ]);
     exit;
 }
-
-home();
+adopcion();
