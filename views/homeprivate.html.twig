@@ -1,0 +1,29 @@
+{% extends 'baseprivate.html.twig' %}
+
+{% block title %}Inicio - Mi Sitio Web{% endblock %}
+
+{% block content %}
+    <h1 class="text-center">Bienvenido a nuestro zoológico</h1>
+    <p class="text-center">Explora nuestras secciones para obtener más información.</p>
+
+    <h2 class="text-center my-4">Últimas Noticias</h2>
+
+    <div class="noticia-container">
+    
+
+        {% for noticia in noticias %}
+            <div class="noticia">
+                <h3>{{ noticia.titular }}</h3>
+                <p>{{ noticia.descripcion }}</p>
+                {% if noticia.imagen %}
+                    <img src="{{ noticia.imagen }}" alt="Imagen de {{ noticia.titular }}">
+                {% else %}
+                    <p>No hay imagen disponible.</p>
+                {% endif %}
+            </div>
+            <hr>
+        {% endfor %}
+
+
+    </div>
+{% endblock %}

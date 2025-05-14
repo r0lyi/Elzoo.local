@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrarse - MyZoo</title>
+    <link href="/vendor/twbs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(to bottom, #d2f7f1, #a3d9a5);
+            font-family: Arial, sans-serif;
+        }
+        .card {
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card p-4">
+        <h2 class="text-center mb-4">Crear una Cuenta</h2>
+
+        {% if mensaje %}
+            <div class="alert {{ mensaje.tipo }} alert-dismissible fade show" role="alert">
+                {{ mensaje.texto }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endif %}
+
+        <form method="post" action="">
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre de Usuario</label>
+                <input type="text" id="nombre" name="nombre" class="form-control" required placeholder="Ingresa tu nombre de usuario">
+            </div>
+            <div class="mb-3">
+                <label for="correo" class="form-label">Correo Electrónico</label>
+                <input type="email" id="correo" name="correo" class="form-control" required placeholder="ejemplo@correo.com">
+            </div>
+            <div class="mb-3">
+                <label for="contraseña" class="form-label">Contraseña</label>
+                <input type="password" id="contraseña" name="contraseña" class="form-control" required placeholder="Ingresa tu contraseña">
+            </div>
+
+            <div class="d-grid">
+                <button type="submit" class="btn btn-success">Registrar</button>
+            </div>
+        </form>
+        <p class="text-center mt-3">
+            ¿Ya tienes una cuenta? <a href="/login" class="text-decoration-none">Iniciar Sesión</a>
+        </p>
+    </div>
+    <script src="/vendor/twbs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

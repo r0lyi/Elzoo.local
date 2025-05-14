@@ -1,13 +1,14 @@
 {
-    "require": {
-        "twig/twig": "^3.0",
-        "twbs/bootstrap": "*",
-        "slim/slim": "^4.0",
-        "slim/psr7": "^1.0"
-    },
     "autoload": {
         "psr-4": {
-            "Elzoo\\": "src/"
+            "DominiLocal\\": "controllers/"
+            
         }
+    },
+    "require": {
+        "firebase/php-jwt": "^6.10",
+        "twig/twig": "^3.0",
+        "twbs/bootstrap": "^5.3"
     }
+
 }
