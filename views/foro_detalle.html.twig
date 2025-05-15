@@ -1,0 +1,61 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ foro.titulo }} – Foro{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <article class="card shadow-sm mb-5">
+    <div class="card-body">
+      <h2 class="card-title">{{ foro.titulo }}</h2>
+      <p class="text-muted">
+        Publicado por <strong>{{ foro.autor_nombre }}</strong>
+        el {{ foro.fecha_creacion|date('d/m/Y H:i') }}
+      </p>
+      <div class="mt-4">
+        {{ foro.contenido|nl2br }}
+      </div>
+    </div>
+  </article>
+
+  <section class="comentarios mb-5">
+    <h3 class="mb-4">Comentarios</h3>
+    {% if comentarios is defined and comentarios|length > 0 %}
+      {% for c in comentarios %}
+        <div class="card mb-3">
+          <div class="card-body">
+            <p>{{ c.contenido|nl2br }}</p>
+            <p class="text-muted small">
+              Comentado por <strong>{{ c.autor_nombre }}</strong>
+              el {{ c.fecha_creacion|date('d/m/Y H:i') }}
+            </p>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p>No hay comentarios aún. Sé el primero en comentar.</p>
+    {% endif %}
+  </section>
+
+  {% if is_authenticated %}
+    <section class="crear-comentario mb-5">
+      <h4 class="mb-3">Añadir comentario</h4>
+      <form action="/forum/{{ foro.id }}/comentario" method="POST">
+        <div class="mb-3">
+          <textarea
+            name="contenido"
+            class="form-control"
+            rows="4"
+            placeholder="Tu comentario..."
+            required
+          ></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Comentar</button>
+      </form>
+    </section>
+  {% else %}
+    <div class="alert alert-warning">
+      Debes iniciar sesión para comentar.
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

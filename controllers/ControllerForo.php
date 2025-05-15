@@ -1,26 +1,47 @@
 <?php
-require_once __DIR__ . '/../controllers/ControllerJWT.php';
-require_once __DIR__ . '/../controllers/ControllerCookie.php';
+// Controlador para listar todas las publicaciones de foro con comprobación de JWT
+
+require_once __DIR__ . '/ControllerTwig.php';
+require_once __DIR__ . '/../models/Foro.php';
 require_once __DIR__ . '/../models/Usuarios.php';
-require_once __DIR__ . '/../controllers/ControllerTwig.php';
-require_once __DIR__ . '/../models/Noticias.php';
+require_once __DIR__ . '/ControllerJWT.php';
+require_once __DIR__ . '/ControllerCookie.php';
 
-
-function foro() {
+/**
+ * Carga todas las publicaciones de foro y las envía a la vista foro.html.twig
+ */
+function listarForos(): void
+{
+    // Verificar autenticación a través del JWT en la cookie
     $jwt = getAuthCookie();
-    $noticias = Noticias::getNoticias();
     $isAuthenticated = false;
-
-    if ($jwt && verificarJWT($jwt, 'mi_clave_secreta')) {
+    global $secret_key;
+    if ($jwt && verificarJWT($jwt, $secret_key)) {
         $isAuthenticated = true;
     } else {
-        deleteAuthCookie(); // Elimina la cookie si el token es inválido
+        deleteAuthCookie();
     }
 
+    // Obtener todas las publicaciones
+    $foros = Foro::obtenerTodos();
+
+    // Enriquecer con nombre de autor
+    $forosData = [];
+    foreach ($foros as $foro) {
+        $autor = Usuarios::obtenerPorId($foro->getAutorId());
+        $forosData[] = [
+            'id'             => $foro->getId(),
+            'titulo'         => $foro->getTitulo(),
+            'contenido'      => $foro->getContenido(),
+            'fecha_creacion' => $foro->getFechaCreacion(),
+            'autor_nombre'   => $autor['nombre'] ?? 'Desconocido',
+        ];
+    }
+
+    // Renderizar la vista de foros
     renderView('foro.html.twig', [
-        'noticias' => $noticias,
-        'is_authenticated' => $isAuthenticated
+        'foros'             => $forosData,
+        'is_authenticated'  => $isAuthenticated
     ]);
     exit;
 }
-foro();
