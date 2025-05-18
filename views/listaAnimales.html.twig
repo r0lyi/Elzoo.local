@@ -19,9 +19,11 @@
                             <div class="card-body text-center">
                                 <h5 class="card-title">{{ animal.nombre }}</h5>
                                 <p class="card-text">
-                                    <strong>Especie:</strong> {{ animal.especie }} <br>
+                                    <strong>Clase:</strong> {{ animal.clase }}
                                 </p>
-                                <a href="/animal/{{ animal.id }}" class="btn btn-primary">Ver detalles</a>
+                                {# Convertir nombre a slug para la URL (opcional: puedes usar un filtro personalizado si lo implementas) #}
+                                {% set nombre_slug = animal.nombre|lower|replace({' ': '-'}) %}
+                                <a href="/animales/{{ nombre_slug }}" class="btn btn-primary">Ver detalles</a>
                             </div>
                         </div>
                     </div>

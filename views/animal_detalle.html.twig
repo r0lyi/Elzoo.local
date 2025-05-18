@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Detalle de {{ animal.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center animate__animated animate__fadeInDown">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <img src="{{ animal.imagen }}" class="card-img-top" alt="Imagen de {{ animal.nombre }}">
+                <div class="card-body">
+                    <h2 class="card-title">{{ animal.nombre }}</h2>
+                    <p><strong>Clase:</strong> {{ animal.clase }}</p>
+                    <p><strong>Nombre científico:</strong> {{ animal.nombre_cientifico }}</p>
+                    <p><strong>Continente:</strong> {{ animal.continente }}</p>
+                    <p><strong>Hábitat:</strong> {{ animal.habitat }}</p>
+                    <p><strong>Dieta:</strong> {{ animal.dieta }}</p>
+                    <p><strong>Peso:</strong> {{ animal.peso }}</p>
+                    <p><strong>Tamaño:</strong> {{ animal.tamano }}</p>
+                    <p><strong>Información:</strong></p>
+                    <p>{{ animal.informacion }}</p>
+                    <p><strong>¿Sabías que?</strong></p>
+                    <p>{{ animal.sabias }}</p>
+                    <p><strong>Fecha de nacimiento:</strong> {{ animal.fecha_nacimiento|date('d/m/Y') }}</p>
+                    <a href="/animales" class="btn btn-secondary mt-3">Volver a lista</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
