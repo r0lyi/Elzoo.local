@@ -209,14 +209,7 @@ class AnimalesController {
              return;
         }
 
-        // --- IMPORTANTE: Manejar restricciones de clave foránea ---
-        // Si otras tablas (ej: ubicaciones_animal, registro_medico) tienen claves foráneas
-        // que *referencian* animales.id, DEBES eliminar o reasignar esas filas PRIMERO,
-        // o definir las FKs con ON DELETE CASCADE en tu esquema de base de datos.
-        // Si no haces esto y existen esas dependencias, obtendrás un error 500
-        // (violación de restricción de integridad).
-        // Asumiendo por ahora que NO hay tablas que referencien animales.id.
-
+     
         // Usar el método del modelo para eliminar el animal
         $success = Animales::delete($id); // El método del modelo ya loggea errores de DB
 

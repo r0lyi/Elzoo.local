@@ -211,23 +211,15 @@ class UsuariosController {
             return;
         }
 
-        // Opcional pero recomendado: Verificar si el usuario existe antes de intentar eliminar
          $userToDelete = Usuarios::find($id); // Usamos find() para obtener el usuario si existe
          if (!$userToDelete) {
               $this->sendErrorResponse("Usuario no encontrado para eliminar.", 404);
               return;
          }
 
-        // --- Bloque try...catch para manejar errores de DB ---
         try {
             $connection = ControllerDatabase::connect(); // Obtener la conexión a la base de datos
 
-            // NOTA: Idealmente, esto se haría dentro de una transacción
-            // o se definirían FKs con ON DELETE CASCADE en la BD.
-            // Aquí, ejecutamos las eliminaciones secuencialmente.
-
-            // --- PASO 1: Eliminar posts de foro del usuario ---
-            // La base de datos impide eliminar un usuario si es autor de posts de foro.
             $queryForos = "DELETE FROM foros WHERE autor_id = ?";
             $stmtForos = $connection->prepare($queryForos);
             $stmtForos->execute([$id]); // Ejecuta la eliminación de posts de foro
@@ -240,25 +232,7 @@ class UsuariosController {
             $queryComments = "DELETE FROM comentarios_foro WHERE autor_id = ?";
             $stmtComments = $connection->prepare($queryComments);
             $stmtComments->execute([$id]); // Ejecuta la eliminación de comentarios
-            // Si hay un error de DB aquí, la PDOException lo capturará.
-            // Si el usuario no tiene comentarios, esto simplemente afectará 0 filas, lo cual es normal.
 
-            // IMPORTANTE: Si los comentarios también tienen una FK a los posts (comentarios_foro.foro_id -> foros.id),
-            // y esa FK NO tiene ON DELETE CASCADE, necesitarías eliminar los comentarios
-            // que pertenecen a los posts del usuario ANTES de eliminar los posts del usuario.
-            // Pero los errores que has mostrado hasta ahora solo indican dependencia DIRECTA de
-            // comentarios -> usuario y foros -> usuario. Si hay otras dependencias,
-            // el log de errores te mostrará la siguiente violación después de arreglar esta.
-            // El orden actual (comentarios del usuario -> posts del usuario -> usuario)
-            // es seguro si los comentarios solo dependen directamente del usuario (autor_id) y no del post (foro_id)
-            // para su eliminación en cascada. Si los comentarios dependen del post,
-            // eliminar los posts podría automáticamente eliminar sus comentarios asociados si la FK de foro_id tiene CASCADE.
-            // Asumiendo que los errores te guían paso a paso, el orden actual debería funcionar.
-
-
-            // --- PASO 3: Eliminar al usuario ---
-            // Ahora que los posts de foro y comentarios (que son dependencias directas mostradas por los errores)
-            // han sido eliminados, podemos eliminar al usuario.
             $success = Usuarios::delete($id); // Llama al método estático DELETE del modelo Usuarios
 
             if ($success) {

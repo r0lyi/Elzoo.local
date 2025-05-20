@@ -2,65 +2,94 @@
 
 switch (true) {
 
-    case $request === '' || $request === '/' || $request === '/home':
-        require_once $controllerDir . 'ControllerHome.php';
-        $routeHandled = true; // ¡Importante! Indica que una ruta fue encontrada y manejada
+    case $requestUri === '' || $requestUri === '/' || $requestUri === '/home': 
+        require_once $controllerDir . 'ControllerHome.php'; 
+       
+        $routeHandled = true; 
         break;
 
-    case $request === '/register':
-        require_once $controllerDir . 'ControllerRegister.php';
+    case $requestUri === '/register': 
+        require_once $controllerDir . 'ControllerRegister.php'; 
+        
         $routeHandled = true;
         break;
 
-    case $request === '/login':
-        require_once $controllerDir . 'ControllerLogin.php';
+    
+    case $requestUri === '/login':
+        
+        require_once $controllerDir . 'ControllerLogin.php'; 
+     
         $routeHandled = true;
         break;
 
-    case $request === '/perfil':
-        require_once $controllerDir . 'ControllerPerfil.php';
+   
+    case $requestUri === '/perfil': 
+       
+        require_once $controllerDir . 'ControllerPerfil.php'; 
+       
         $routeHandled = true;
         break;
 
-    case $request === '/animales':
-        require_once $controllerDir . 'ControllerList.php';
+    
+    case $requestUri === '/animales': 
+        require_once $controllerDir . 'ControllerList.php'; 
         $routeHandled = true;
         break;
 
-    case $request === '/admin':
-        require_once $controllerDir . 'ControllerAdmin.php';
-        $routeHandled = true;
-        break;
+   
+    
 
-    // Ruta foro: listado (GET /forum)
-    case $request === '/forum':
+   
+    case $requestUri === '/forum' && $requestMethod === 'GET': 
         require_once $controllerDir . 'ControllerForo.php';
-        listarForos();
+        
+        listarForos(); 
         $routeHandled = true;
         break;
 
-    // Ruta foro: detalle (GET /forum/{id})
-    case preg_match('#^/forum/(\d+)$#', $request, $m_foro) === 1 && $_SERVER['REQUEST_METHOD'] === 'GET':
-        $_GET['id'] = $m_foro[1];
-        require_once $controllerDir . 'ControllerForoDetail.php';
-        detalleForo();
+    
+    case preg_match('#^/forum/(\d+)$#', $requestUri, $m_foro) === 1 && $requestMethod === 'GET':
+        $_GET['id'] = $m_foro[1]; 
+        require_once $controllerDir . 'ControllerForoDetail.php'; 
+        detalleForo(); 
+        $routeHandled = true;
+        break;
+   
+    case preg_match('#^/animales/([^/]+)$#', $requestUri, $matches) === 1 && $requestMethod === 'GET':
+        $_GET['nombre'] = $matches[1]; 
+        require_once $controllerDir . 'ControllerAnimalDetail.php'; 
+        mostrarAnimal(); 
+        $routeHandled = true;
+        break;
+  
+     case $requestUri === '/admin':
+        require_once $controllerDir . 'ControllerAdmin.php';
+        adminPanel(null, 'Bienvenido al panel de administración de MyZoo. Selecciona una opción del menú de la izquierda.');
         $routeHandled = true;
         break;
 
-    case $request === '/adopcion':
-        require_once $controllerDir . 'ControllerAdopcion.php';
+    case $requestUri === '/admin/users':
+        require_once $controllerDir . 'ControllerAdmin.php';
+        adminPanel('usuarioAdmin', 'Este es el apartado de gestión de usuarios.');
         $routeHandled = true;
         break;
 
-    // Ruta dinámica para detalle de animal: /animales/{slug}
-    case preg_match('#^/animales/([^/]+)$#', $request, $matches) === 1:
-        $_GET['nombre'] = $matches[1];
-        require_once $controllerDir . 'ControllerAnimalDetail.php';
-        mostrarAnimal();
+    case $requestUri === '/admin/foro':
+        require_once $controllerDir . 'ControllerAdmin.php';
+        adminPanel('foroAdmin', 'Este es el apartado de gestión de foros.');
         $routeHandled = true;
         break;
 
-    // IMPORTANTE: No incluyas un 'default:' aquí para el 404.
-    // Si ningún caso web coincide, $routeHandled seguirá siendo false,
-    // y el 404 se manejará en index.php.
+    case $requestUri === '/admin/noticias':
+        require_once $controllerDir . 'ControllerAdmin.php';
+        adminPanel('noticiaAdmin', 'Este es el apartado de gestión de noticias.');
+        $routeHandled = true;
+        break;
+
+    case $requestUri === '/admin/animales':
+        require_once $controllerDir . 'ControllerAdmin.php';
+        adminPanel('animalAdmin', 'Este es el apartado de gestión de animales.');
+        $routeHandled = true;
+        break;
+ 
 }
