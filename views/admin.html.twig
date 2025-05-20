@@ -5,25 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Administración - MyZoo</title>
 
-    {# Preconexión para mejor performance #}
+    {# Preconexión y Hojas de estilo existentes #}
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="preconnect" href="https://unpkg.com">
-
-    {# Hojas de estilo externas #}
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
-            integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-            integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
-            crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
-            integrity="sha512-c42qTSw/wPZ3/5LBzD+Bw5fFbUJNUx3j+HaURHvzHpqEj8U7DnFE8gVxyfD5xXiz0MYmmOKdGy3q5mQjXUuRQ=="
-            crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-            integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-            crossorigin="anonymous"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" integrity="sha512-c42qTSw/wPZ3/5LBzD+Bw5fFbUJNUx3j+HaURHvzHpqEj8U7DnFE8gVxyfD5xXiz0MYmmOKdGy3q5mQjXUuRQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous"/>
 
     <style>
         body {
@@ -148,32 +136,34 @@
             <h2><i class="fas fa-cogs"></i> Admin Panel</h2>
             <nav>
                 <ul>
-                    <li><a href="/admin/users" class="nav-link {% if active_component == 'usuarioAdmin' %}active{% endif %}"><i class="fas fa-users"></i> Usuarios</a></li>
-                    <li><a href="/admin/animales" class="nav-link {% if active_component == 'animalAdmin' %}active{% endif %}"><i class="fas fa-paw"></i> Animales</a></li>
-                    <li><a href="/admin/noticias" class="nav-link {% if active_component == 'noticiaAdmin' %}active{% endif %}"><i class="fas fa-newspaper"></i> Noticias</a></li>
-                    <li><a href="/admin/foro" class="nav-link {% if active_component == 'foroAdmin' %}active{% endif %}"><i class="fas fa-comments"></i> Foros</a></li>
+                    {# data-component es para JS. href para la URL normal (fallback/primera carga) #}
+                    <li><a href="/admin/users" class="nav-link {% if active_component == 'usuarioAdmin' %}active{% endif %}" data-component="usuarioAdmin"><i class="fas fa-users"></i> Usuarios</a></li>
+                    <li><a href="/admin/animales" class="nav-link {% if active_component == 'animalAdmin' %}active{% endif %}" data-component="animalAdmin"><i class="fas fa-paw"></i> Animales</a></li>
+                    <li><a href="/admin/noticias" class="nav-link {% if active_component == 'noticiaAdmin' %}active{% endif %}" data-component="noticiaAdmin"><i class="fas fa-newspaper"></i> Noticias</a></li>
+                    <li><a href="/admin/foro" class="nav-link {% if active_component == 'foroAdmin' %}active{% endif %}" data-component="foroAdmin"><i class="fas fa-comments"></i> Foros</a></li>
                 </ul>
             </nav>
         </aside>
 
-        {# Área de contenido principal #}
+        {# Área de contenido principal, donde el JS cargará los componentes #}
         <main class="admin-content-area">
-            {# Muestra el mensaje recibido desde el controlador #}
-            {% if content_message is defined and content_message is not empty %}
-                <div class="alert alert-primary" role="alert">
-                    <h4 class="alert-heading">Info:</h4>
-                    <p>{{ content_message }}</p>
-                    <hr>
-                    <p class="mb-0">Aquí verás el contenido detallado de esta sección una vez se integren las llamadas a la API.</p>
-                </div>
-            {% else %}
-                {# Contenido por defecto si no hay mensaje (ej. al cargar /admin por primera vez) #}
-                <h2><i class="fas fa-tachometer-alt"></i> Dashboard Administrativo</h2>
-                <p>Bienvenido al panel de administración de MyZoo. Utiliza el menú de la izquierda para navegar por las diferentes secciones de gestión.</p>
-                <div class="alert alert-info mt-4" role="alert">
-                    Este es tu espacio de trabajo principal.
-                </div>
-            {% endif %}
+            {# Este div será el objetivo para inyectar el HTML de los componentes vía AJAX #}
+            <div id="admin-dynamic-content">
+                {% if active_component is defined and active_component is not null %}
+                    {# Si estamos en una URL de componente (ej. /admin/users) en la carga inicial, PHP incluye el componente #}
+                    {% include 'components/' ~ active_component ~ '.html.twig' %}
+                {% else %}
+                    {# Contenido por defecto cuando no se selecciona un componente (Dashboard) #}
+                    <h2><i class="fas fa-tachometer-alt"></i> Dashboard Administrativo</h2>
+                    {% if content_message is defined and content_message is not empty %}
+                        <div class="alert alert-info mt-4" role="alert">
+                            {{ content_message }}
+                        </div>
+                    {% else %}
+                        <p>Bienvenido al panel de administración de MyZoo. Utiliza el menú de la izquierda para navegar por las diferentes secciones de gestión.</p>
+                    {% endif %}
+                {% endif %}
+            </div>
         </main>
     </div>
 
@@ -211,7 +201,9 @@
     </script>
     <script src="https://nocodeveloper.com/chat.js"></script>
 
-    {# No necesitamos admin.js si no hay carga dinámica de componentes #}
-    {% block javascripts %}{% endblock %}
+    {# Carga tu script admin.js aquí para la carga dinámica de componentes #}
+    {% block javascripts %}
+        <script src="/js/admin.js"></script>
+    {% endblock %}
 </body>
 </html>

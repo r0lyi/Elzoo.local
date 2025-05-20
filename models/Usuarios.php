@@ -101,6 +101,21 @@ class Usuarios {
         $stmt = $connection->prepare($query);
         return $stmt->execute($values);
     }
+    public static function updatePassword($id, $newPassword) {
+        $connection = ControllerDatabase::connect();
+
+        // NUNCA guardes contraseñas en texto plano. Hashear antes de guardar.
+        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+
+        if ($hashedPassword === false) {
+            error_log("Error al hashear la contraseña para el usuario ID: {$id}");
+            return false;
+        }
+
+        $query = "UPDATE usuarios SET password = ? WHERE id = ?";
+        $stmt = $connection->prepare($query);
+        return $stmt->execute([$hashedPassword, $id]);
+    }
 
     public static function delete($id) {
         $connection = ControllerDatabase::connect();

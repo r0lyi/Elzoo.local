@@ -1,21 +1,20 @@
 <?php
 // controllers/ControllerAdmin.php
 
-// Cargamos solo lo necesario para autenticación y renderizado de vistas
 require_once __DIR__ . '/../controllers/ControllerJWT.php';
 require_once __DIR__ . '/../controllers/ControllerCookie.php';
-require_once __DIR__ . '/../controllers/ControllerTwig.php'; // Asume que renderView está aquí
+require_once __DIR__ . '/../controllers/ControllerTwig.php'; // Asegúrate de que renderView esté aquí
 
 /**
  * Función principal para manejar las vistas del panel de administración.
  * Se encarga de la autenticación y de renderizar el layout principal
- * incluyendo el componente solicitado, mostrando un mensaje simple.
+ * o solo el componente solicitado si la petición es AJAX.
  *
- * @param string|null $componente_a_mostrar El nombre del componente Twig a "activar" (ej. 'usuarioAdmin').
- * Si es null, se muestra el dashboard por defecto.
- * @param string $mensaje_contenido Un mensaje simple a mostrar en el área de contenido.
+ * @param string|null $componente_a_mostrar El nombre del componente Twig a cargar (ej. 'usuarioAdmin').
+ * Si es null, se muestra el dashboard por defecto (solo si no es AJAX).
+ * @param string $welcomeMessage Mensaje informativo opcional (usado en carga inicial).
  */
-function adminPanel($componente_a_mostrar = null, $mensaje_contenido = '') {
+function adminPanel($componente_a_mostrar = null, $welcomeMessage = '') {
     $jwt = getAuthCookie();
     $isAuthenticated = false;
     $userData = null;
@@ -23,7 +22,6 @@ function adminPanel($componente_a_mostrar = null, $mensaje_contenido = '') {
     // Lógica de autenticación JWT
     if ($jwt && verificarJWT($jwt, 'mi_clave_secreta')) {
         $isAuthenticated = true;
-        // Opcional: Decodificar el JWT para obtener datos del usuario
         $payload = json_decode(base64_decode(explode('.', $jwt)[1]), true);
         $userData = $payload;
     } else {
@@ -38,14 +36,26 @@ function adminPanel($componente_a_mostrar = null, $mensaje_contenido = '') {
         exit;
     }
 
+    // Detectar si la petición es AJAX
+    $isAjax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+
     $templateData = [
         'is_authenticated' => $isAuthenticated,
         'user_data' => $userData,
         'active_component' => $componente_a_mostrar, // Para resaltar la opción activa en el menú
-        'content_message' => $mensaje_contenido // Pasa el mensaje al área de contenido
+        'content_message' => $welcomeMessage // Mensaje para la carga inicial o para el dashboard
     ];
 
-    // Siempre renderizamos el layout principal de admin.
-    renderView('admin.html.twig', $templateData);
-    exit;
+    // Si es una petición AJAX y se ha especificado un componente, renderiza SOLO el componente.
+    if ($isAjax && $componente_a_mostrar) {
+        // Renderiza solo el HTML del componente, sin header/footer/sidebar
+        // El ControllerTwig debe saber cómo encontrar estos archivos
+        renderView('components/' . $componente_a_mostrar . '.html.twig', $templateData);
+        exit; // Es crucial salir para que no se renderice el layout completo
+    } else {
+        // Si no es AJAX (primera carga de la página) o si es /admin sin componente específico,
+        // renderiza el layout completo de admin.html.twig.
+        renderView('admin.html.twig', $templateData);
+        exit;
+    }
 }

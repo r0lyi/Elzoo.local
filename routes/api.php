@@ -23,6 +23,19 @@ $segment3 = $apiSegments[2] ?? null;
 switch ($resource) {
     case 'usuarios':
         $userId = $segment2; 
+        // PUT /api/v1/usuarios/{id}/password
+        if ($userId && is_numeric($userId) && $segment3 === 'password' && count($apiSegments) === 3) {
+            if ($requestMethod === 'PUT') {
+                $controller = new UsuariosController();
+                $controller->updatePassword($userId);
+                $routeHandled = true;
+            } else {
+                http_response_code(405);
+                echo json_encode(["message" => "Método " . $requestMethod . " no permitido para este endpoint de contraseña."]);
+                $routeHandled = true;
+            }
+            break; // Salir del switch 'usuarios' después de manejar la contraseña
+        }
         if (count($apiSegments) <= 2) { 
              $controller = new UsuariosController();
              switch ($requestMethod) {

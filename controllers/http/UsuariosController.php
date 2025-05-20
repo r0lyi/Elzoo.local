@@ -201,6 +201,46 @@ class UsuariosController {
             $this->sendErrorResponse("Error al actualizar el usuario en la base de datos.", 500);
         }
     }
+     public function updatePassword($id) {
+        // Validar que el ID sea un número entero positivo
+        if (!filter_var($id, FILTER_VALIDATE_INT, array('options' => array('min_range' => 1)))) {
+            $this->sendErrorResponse("ID de usuario inválido para actualizar contraseña.", 400);
+            return;
+        }
+
+        $data = $this->getJsonRequestBody();
+
+        if ($data === null) {
+            return; // getJsonRequestBody ya maneja el error
+        }
+
+        // Validar que la nueva contraseña esté presente y no esté vacía
+        if (!isset($data->password) || trim($data->password) === '') {
+            $this->sendErrorResponse("El campo 'password' es requerido y no puede estar vacío.", 400);
+            return;
+        }
+
+        // Opcional: Añadir validaciones de longitud mínima, complejidad, etc. para la contraseña
+        // if (strlen($data->password) < 8) {
+        //     $this->sendErrorResponse("La contraseña debe tener al menos 8 caracteres.", 400);
+        //     return;
+        // }
+
+        // Verificar si el usuario existe antes de intentar actualizar
+        if (!Usuarios::find($id)) {
+            $this->sendErrorResponse("Usuario no encontrado para actualizar contraseña.", 404);
+            return;
+        }
+
+        // Llamar al método del modelo para actualizar la contraseña
+        $success = Usuarios::updatePassword($id, $data->password);
+
+        if ($success) {
+            $this->sendJsonResponse(["message" => "Contraseña del usuario actualizada con éxito."], 200);
+        } else {
+            $this->sendErrorResponse("Error al actualizar la contraseña del usuario en la base de datos.", 500);
+        }
+    }
 
   
     // Maneja la solicitud DELETE /api/v1/usuarios/{id}

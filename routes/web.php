@@ -62,7 +62,7 @@ switch (true) {
         $routeHandled = true;
         break;
   
-     case $requestUri === '/admin':
+   case $requestUri === '/admin':
         require_once $controllerDir . 'ControllerAdmin.php';
         adminPanel(null, 'Bienvenido al panel de administración de MyZoo. Selecciona una opción del menú de la izquierda.');
         $routeHandled = true;

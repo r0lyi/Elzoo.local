@@ -1,212 +1,291 @@
-// Archivo: /public/js/animales.js
+// public/js/animales.js
 
-// Este código se ejecutará cuando el script sea cargado dinámicamente por admin.js
-console.log("animales.js cargado");
-
-const API_ANIMALES_URL = '/api/v1/animales'; // !!! ASEGÚRATE DE QUE ESTA RUTA RELATIVA A TU WEBROOT (public) SEA CORRECTA !!!
-
-// --- Funciones de Utilidad (Pueden estar en un archivo helpers.js compartido en public/js/) ---
-// Copia si no tienes un archivo compartido
-function showMessage(element, message, type) {
-    if (element) {
-        element.textContent = message;
-        element.className = `message ${type}`;
-        element.style.display = 'block';
-    }
-}
-
-function hideMessage(element) {
-     if (element) {
-        element.style.display = 'none';
-        element.textContent = '';
-        element.className = 'message';
-     }
-}
-
-function clearForm(form) {
-    if (form) form.reset();
-}
-
-
-// --- CRUD: Listar Animales (Función de inicialización llamada por admin.js) ---
-async function loadAnimals() {
-    console.log("Cargando animales...");
-    // Referencias a elementos del DOM específicos de la sección animales
-    // Estos elementos DEBEN existir en el HTML cargado (gracias a los includes en Twig)
+document.addEventListener('DOMContentLoaded', function() {
+    // Referencias a elementos del DOM
     const animalsTableBody = document.getElementById('animalsTableBody');
-    const animalListMessage = document.getElementById('animalListMessage');
-    const editAnimalSection = document.getElementById('editAnimalSection');
-
-    if (!animalsTableBody || !animalListMessage) {
-         console.error('Elementos de tabla de animales o mensajes no encontrados al intentar cargar datos.');
-         return;
-    }
-
-    hideMessage(animalListMessage);
-    if(editAnimalSection) editAnimalSection.style.display = 'none'; // Ocultar form de edición al cargar la lista
-    animalsTableBody.innerHTML = ''; // Limpiar la tabla antes de cargar
-
-    try {
-        const response = await fetch(API_ANIMALES_URL);
-        const data = await response.json();
-
-        if (!response.ok) {
-            showMessage(animalListMessage, `Error al cargar animales: ${data.message || response.statusText}`, 'error');
-            return;
-        }
-
-        if (data.length === 0) {
-            animalsTableBody.innerHTML = '<tr><td colspan="7">No hay animales registrados.</td></tr>'; // 7 columnas
-            return;
-        }
-
-        data.forEach(animal => {
-            const row = animalsTableBody.insertRow();
-            row.innerHTML = `
-                <td>${animal.id}</td>
-                <td><img src="${animal.imagen}" alt="${animal.nombre}" style="width: 50px; height: auto;"></td>
-                <td>${animal.nombre}</td>
-                <td>${animal.clase}</td>
-                <td>${animal.continente}</td>
-                <td>${animal.habitat}</td>
-                <td>
-                    <button class="button-warning edit-animal-button" data-animal-id="${animal.id}">Editar</button>
-                    <button class="button-danger delete-animal-button" data-animal-id="${animal.id}">Eliminar</button>
-                </td>
-            `;
-        });
-
-    } catch (error) {
-        console.error('Error fetching animals:', error);
-        showMessage(animalListMessage, 'Ocurrió un error al conectar con la API para cargar animales.', 'error');
-    }
-}
-
-// --- Exponer la función de inicialización globalmente ---
-// El script admin.js la llamará después de cargar este archivo
-window.loadAnimals = loadAnimals;
-
-
-// --- Event Listeners (Se adjuntan cuando este script se ejecuta y el DOM está listo) ---
-document.addEventListener('DOMContentLoaded', () => {
-     console.log("DOMContentLoaded en animales.js");
-
-    // Obtener referencias AHORA que el DOM está garantizado
-    const animalsTableBody = document.getElementById('animalsTableBody');
+    const animalAlertMessage = document.getElementById('animal-alert-message');
+    const refreshAnimalsBtn = document.getElementById('refreshAnimalsBtn');
     const addAnimalForm = document.getElementById('addAnimalForm');
-    const addAnimalMessage = document.getElementById('addAnimalMessage');
-    const editAnimalSection = document.getElementById('editAnimalSection');
     const editAnimalForm = document.getElementById('editAnimalForm');
-    const editAnimalId = document.getElementById('editAnimalId');
-    const editAnimalNombre = document.getElementById('editAnimalNombre');
-    const editAnimalNombreCientifico = document.getElementById('editAnimalNombreCientifico');
-    const editAnimalClase = document.getElementById('editAnimalClase');
-    const editAnimalContinente = document.getElementById('editAnimalContinente');
-    const editAnimalHabitat = document.getElementById('editAnimalHabitat');
-    const editAnimalDieta = document.getElementById('editAnimalDieta');
-    const editAnimalInformacion = document.getElementById('editAnimalInformacion');
-    const editAnimalImagen = document.getElementById('editAnimalImagen');
-    const editAnimalPeso = document.getElementById('editAnimalPeso');
-    const editAnimalTamano = document.getElementById('editAnimalTamano');
-    const editAnimalSabias = document.getElementById('editAnimalSabias');
-    const editAnimalFechaNacimiento = document.getElementById('editAnimalFechaNacimiento');
-    const editAnimalMessage = document.getElementById('editAnimalMessage');
-    const cancelEditAnimalButton = document.getElementById('cancelEditAnimalButton');
+    const confirmDeleteAnimalBtn = document.getElementById('confirmDeleteAnimalBtn');
 
-    // --- CRUD: Añadir Animal ---
-    if (addAnimalForm) { /* ... (código submit form añadir) ... */
-        addAnimalForm.addEventListener('submit', async (e) => {
-            e.preventDefault(); hideMessage(addAnimalMessage);
-            const formData = new FormData(addAnimalForm);
-            const animalData = {};
-            formData.forEach((value, key) => {
-                 if ((key === 'peso' || key === 'tamano') && value !== '') {
-                     animalData[key] = parseFloat(value);
-                 } else if (value !== '') { animalData[key] = value; }
+    // Modals de Bootstrap (instancias para controlar su visibilidad)
+    const addAnimalModal = new bootstrap.Modal(document.getElementById('addAnimalModal'));
+    const editAnimalModal = new bootstrap.Modal(document.getElementById('editAnimalModal'));
+    const deleteAnimalModal = new bootstrap.Modal(document.getElementById('deleteAnimalModal'));
+
+    // Función para mostrar mensajes de alerta
+    function showAlert(message, type = 'success') {
+        animalAlertMessage.textContent = message;
+        animalAlertMessage.className = `alert alert-${type} d-block`;
+        setTimeout(() => {
+            animalAlertMessage.classList.add('d-none');
+        }, 5000);
+    }
+
+    // Función para renderizar la tabla de animales
+    function renderAnimalsTable(animals) {
+        animalsTableBody.innerHTML = ''; // Limpiar la tabla
+
+        if (animals.length === 0) {
+            animalsTableBody.innerHTML = '<tr><td colspan="9" class="text-center p-4">No hay animales registrados.</td></tr>';
+            return;
+        }
+
+        animals.forEach(animal => {
+            const row = `
+                <tr>
+                    <td>${animal.id}</td>
+                    <td><img src="${animal.imagen || '/img/default-animal.png'}" alt="${animal.nombre}" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;"></td>
+                    <td>${animal.nombre}</td>
+                    <td>${animal.nombre_cientifico}</td>
+                    <td>${animal.clase}</td>
+                    <td>${animal.continente}</td>
+                    <td>${animal.habitat}</td>
+                    <td>${animal.dieta}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info me-2 edit-animal-btn" data-id="${animal.id}">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button class="btn btn-sm btn-danger delete-animal-btn" data-id="${animal.id}" data-name="${animal.nombre}">
+                            <i class="fas fa-trash-alt"></i> Eliminar
+                        </button>
+                    </td>
+                </tr>
+            `;
+            animalsTableBody.insertAdjacentHTML('beforeend', row);
+        });
+
+        // Adjuntar eventos a los nuevos botones
+        attachTableButtonListeners();
+    }
+
+    // Función para cargar animales desde la API
+    async function loadAnimals() {
+        animalsTableBody.innerHTML = '<tr><td colspan="9" class="text-center p-4"><i class="fas fa-spinner fa-spin fa-2x"></i> Cargando animales...</td></tr>';
+        try {
+            const response = await fetch('/api/v1/animales'); // Tu endpoint de la API
+            const data = await response.json();
+            if (response.ok) {
+                renderAnimalsTable(data);
+            } else {
+                showAlert(`Error al cargar animales: ${data.message || response.statusText}`, 'danger');
+                animalsTableBody.innerHTML = '<tr><td colspan="9" class="text-center text-danger p-4">Error al cargar los animales.</td></tr>';
+            }
+        } catch (error) {
+            console.error('Error fetching animals:', error);
+            showAlert('Error de conexión al cargar animales.', 'danger');
+            animalsTableBody.innerHTML = '<tr><td colspan="9" class="text-center text-danger p-4">Error de conexión.</td></tr>';
+        }
+    }
+
+    // Función para añadir un nuevo animal
+    addAnimalForm.addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        const animalData = {
+            nombre: document.getElementById('addAnimalNombre').value,
+            nombre_cientifico: document.getElementById('addAnimalNombreCientifico').value,
+            clase: document.getElementById('addAnimalClase').value,
+            continente: document.getElementById('addAnimalContinente').value,
+            habitat: document.getElementById('addAnimalHabitat').value,
+            dieta: document.getElementById('addAnimalDieta').value,
+            informacion: document.getElementById('addAnimalInformacion').value,
+            imagen: document.getElementById('addAnimalImagen').value,
+            peso: document.getElementById('addAnimalPeso').value,
+            tamano: document.getElementById('addAnimalTamano').value,
+            sabias: document.getElementById('addAnimalSabias').value,
+            fecha_nacimiento: document.getElementById('addAnimalFechaNacimiento').value
+        };
+
+        // Eliminar campos vacíos u opcionales para no enviarlos si no tienen valor
+        for (const key in animalData) {
+            if (animalData[key] === null || animalData[key] === '') {
+                delete animalData[key];
+            }
+        }
+
+        try {
+            const response = await fetch('/api/v1/animales', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(animalData)
             });
-            try { /* ... fetch POST ... */
-                const response = await fetch(API_ANIMALES_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(animalData) });
-                const result = await response.json();
-                if (response.status === 201) {
-                    showMessage(addAnimalMessage, 'Animal creado con éxito.', 'success'); clearForm(addAnimalForm); loadAnimals(); // Recargar la lista
-                } else { showMessage(addAnimalMessage, `Error al crear animal: ${result.message || response.statusText}`, 'error'); }
-            } catch (error) { console.error('Error adding animal:', error); showMessage(addAnimalMessage, 'Ocurrió un error al conectar con la API.', 'error'); }
-        });
-    }
 
-    // --- CRUD: Editar Animal ---
-    if (animalsTableBody) { /* ... (código delegación click editar) ... */
-        animalsTableBody.addEventListener('click', async (e) => {
-            if (e.target.classList.contains('edit-animal-button')) {
-                const animalId = e.target.dataset.animalId; hideMessage(editAnimalMessage); hideMessage(document.getElementById('animalListMessage'));
-                try { /* ... fetch GET ... */
-                    const response = await fetch(`${API_ANIMALES_URL}/${animalId}`);
+            const data = await response.json();
+
+            if (response.ok) {
+                showAlert('Animal añadido con éxito.', 'success');
+                addAnimalModal.hide();
+                addAnimalForm.reset();
+                loadAnimals();
+            } else {
+                showAlert(`Error al añadir animal: ${data.message || 'Error desconocido.'}`, 'danger');
+            }
+        } catch (error) {
+            console.error('Error adding animal:', error);
+            showAlert('Error de conexión al añadir animal.', 'danger');
+        }
+    });
+
+    // Función para editar un animal existente
+    editAnimalForm.addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        const id = document.getElementById('editAnimalId').value;
+        const animalData = {
+            nombre: document.getElementById('editAnimalNombre').value,
+            nombre_cientifico: document.getElementById('editAnimalNombreCientifico').value,
+            clase: document.getElementById('editAnimalClase').value,
+            continente: document.getElementById('editAnimalContinente').value,
+            habitat: document.getElementById('editAnimalHabitat').value,
+            dieta: document.getElementById('editAnimalDieta').value,
+            informacion: document.getElementById('editAnimalInformacion').value,
+            imagen: document.getElementById('editAnimalImagen').value,
+            peso: document.getElementById('editAnimalPeso').value,
+            tamano: document.getElementById('editAnimalTamano').value,
+            sabias: document.getElementById('editAnimalSabias').value,
+            fecha_nacimiento: document.getElementById('editAnimalFechaNacimiento').value
+        };
+
+        // Eliminar campos vacíos u opcionales para no enviarlos si no tienen valor
+        for (const key in animalData) {
+            if (animalData[key] === null || animalData[key] === '') {
+                delete animalData[key];
+            }
+        }
+
+        try {
+            const response = await fetch(`/api/v1/animales/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(animalData)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                showAlert('Animal actualizado con éxito.', 'success');
+                editAnimalModal.hide();
+                loadAnimals();
+            } else {
+                showAlert(`Error al actualizar animal: ${data.message || 'Error desconocido.'}`, 'danger');
+            }
+        } catch (error) {
+            console.error('Error updating animal:', error);
+            showAlert('Error de conexión al actualizar animal.', 'danger');
+        }
+    });
+
+    // Función para eliminar un animal
+    confirmDeleteAnimalBtn.addEventListener('click', async function() {
+        const id = document.getElementById('deleteAnimalIdConfirm').value;
+
+        try {
+            const response = await fetch(`/api/v1/animales/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                showAlert(data.message || 'Animal eliminado con éxito.', 'success');
+                deleteAnimalModal.hide();
+                loadAnimals();
+            } else {
+                showAlert(`Error al eliminar animal: ${data.message || 'Error desconocido.'}`, 'danger');
+            }
+        } catch (error) {
+            console.error('Error deleting animal:', error);
+            showAlert('Error de conexión al eliminar animal.', 'danger');
+        }
+    });
+
+    // Delegación de eventos para botones de la tabla (Editar y Eliminar)
+    function attachTableButtonListeners() {
+        animalsTableBody.querySelectorAll('.edit-animal-btn').forEach(button => {
+            button.addEventListener('click', async function() {
+                const id = this.dataset.id;
+                try {
+                    const response = await fetch(`/api/v1/animales/${id}`);
                     const animal = await response.json();
-                    const animalListMessageElement = document.getElementById('animalListMessage');
-                    if (!response.ok) {
-                        if(animalListMessageElement) showMessage(animalListMessageElement, `Error al obtener datos del animal para editar: ${animal.message || response.statusText}`, 'error');
-                         else console.error(`Error fetching animal ${animalId}:`, animal.message || response.statusText);
-                         return;
-                    }
-                    if(editAnimalForm){ /* ... rellenar form y mostrar ... */
-                         editAnimalId.value = animal.id; editAnimalNombre.value = animal.nombre; editAnimalNombreCientifico.value = animal.nombre_cientifico; editAnimalClase.value = animal.clase; editAnimalContinente.value = animal.continente; editAnimalHabitat.value = animal.habitat; editAnimalDieta.value = animal.dieta; editAnimalInformacion.value = animal.informacion; editAnimalImagen.value = animal.imagen; editAnimalPeso.value = animal.peso; editAnimalTamano.value = animal.tamano; editAnimalSabias.value = animal.sabias; editAnimalFechaNacimiento.value = animal.fecha_nacimiento;
-                         if(editAnimalSection) editAnimalSection.style.display = 'block';
-                    }
-                } catch (error) { console.error('Error fetching animal for edit:', error); const animalListMessageElement = document.getElementById('animalListMessage'); if(animalListMessageElement) showMessage(animalListMessageElement, 'Ocurrió un error al obtener los datos del animal para editar.', 'error'); }
-            }
-        });
-    }
-
-    if (editAnimalForm) { /* ... (código submit form editar) ... */
-         editAnimalForm.addEventListener('submit', async (e) => {
-            e.preventDefault(); hideMessage(editAnimalMessage);
-            const animalId = editAnimalId.value;
-            const formData = new FormData(editAnimalForm);
-             const updateData = {};
-             formData.forEach((value, key) => {
-                  if (key === 'id') return;
-                  if ((key === 'peso' || key === 'tamano') && value !== '') { updateData[key] = parseFloat(value); }
-                  else if (value !== '') { updateData[key] = value; }
-             });
-             if (!animalId) { showMessage(editAnimalMessage, 'Error: ID de animal para actualizar no encontrado.', 'error'); return; }
-             if (Object.keys(updateData).length === 0) { showMessage(editAnimalMessage, 'No hay campos para actualizar.', 'warning'); if(editAnimalSection) editAnimalSection.style.display = 'none'; return; }
-            try { /* ... fetch PUT ... */
-                const response = await fetch(`${API_ANIMALES_URL}/${animalId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updateData) });
-                 const result = await response.json();
-                if (response.ok) {
-                    showMessage(editAnimalMessage, 'Animal actualizado con éxito.', 'success');
-                    if(editAnimalSection) editAnimalSection.style.display = 'none';
-                    loadAnimals(); // Recargar la lista
-                } else { showMessage(editAnimalMessage, `Error al actualizar animal: ${result.message || response.statusText}`, 'error'); }
-            } catch (error) { console.error('Error updating animal:', error); showMessage(editAnimalMessage, 'Ocurrió un error al conectar con la API.', 'error'); }
-         });
-    }
-
-    if (cancelEditAnimalButton && editAnimalSection) { /* ... (código cancelar editar) ... */
-        cancelEditAnimalButton.addEventListener('click', () => { editAnimalSection.style.display = 'none'; hideMessage(editAnimalMessage); });
-    }
-
-    // --- CRUD: Eliminar Animal ---
-     if (animalsTableBody) { /* ... (código delegación click eliminar) ... */
-        animalsTableBody.addEventListener('click', async (e) => {
-            if (e.target.classList.contains('delete-animal-button')) {
-                const animalId = e.target.dataset.animalId;
-                const animalListMessageElement = document.getElementById('animalListMessage');
-                if (!confirm(`¿Estás seguro de que quieres eliminar al animal con ID ${animalId}?`)) return;
-                if(animalListMessageElement) hideMessage(animalListMessageElement);
-                try { /* ... fetch DELETE ... */
-                    const response = await fetch(`${API_ANIMALES_URL}/${animalId}`, { method: 'DELETE' });
-                    const result = await response.json();
                     if (response.ok) {
-                        if(animalListMessageElement) showMessage(animalListMessageElement, `Animal ${animalId} eliminado con éxito.`, 'success');
-                        const row = e.target.closest('tr'); if (row) row.remove();
-                        if (animalsTableBody.children.length === 0) { animalsTableBody.innerHTML = '<tr><td colspan="7">No hay animales registrados.</td></tr>'; }
+                        // Rellenar el modal de edición con los datos del animal
+                        document.getElementById('editAnimalId').value = animal.id;
+                        document.getElementById('editAnimalNombre').value = animal.nombre || '';
+                        document.getElementById('editAnimalNombreCientifico').value = animal.nombre_cientifico || '';
+                        document.getElementById('editAnimalClase').value = animal.clase || '';
+                        document.getElementById('editAnimalContinente').value = animal.continente || '';
+                        document.getElementById('editAnimalHabitat').value = animal.habitat || '';
+                        document.getElementById('editAnimalDieta').value = animal.dieta || '';
+                        document.getElementById('editAnimalInformacion').value = animal.informacion || '';
+                        document.getElementById('editAnimalImagen').value = animal.imagen || '';
+                        document.getElementById('editAnimalPeso').value = animal.peso || '';
+                        document.getElementById('editAnimalTamano').value = animal.tamano || '';
+                        document.getElementById('editAnimalSabias').value = animal.sabias || '';
+                        document.getElementById('editAnimalFechaNacimiento').value = animal.fecha_nacimiento || '';
+
+                        editAnimalModal.show();
                     } else {
-                         if(animalListMessageElement) showMessage(animalListMessageElement, `Error al eliminar animal ${animalId}: ${result.message || response.statusText}`, 'error');
-                         else console.error(`Error deleting animal ${animalId}:`, result.message || response.statusText);
+                        showAlert(`No se pudo cargar el animal para edición: ${animal.message || 'Error desconocido.'}`, 'danger');
                     }
-                } catch (error) { console.error('Error deleting animal:', error); if(animalListMessageElement) showMessage(animalListMessageElement, 'Ocurrió un error al conectar con la API.', 'error'); }
+                } catch (error) {
+                    console.error('Error fetching animal for edit:', error);
+                    showAlert('Error de conexión al cargar datos del animal para edición.', 'danger');
+                }
+            });
+        });
+
+        animalsTableBody.querySelectorAll('.delete-animal-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const id = this.dataset.id;
+                const name = this.dataset.name;
+
+                // Rellenar el modal de confirmación
+                document.getElementById('deleteAnimalIdConfirm').value = id;
+                document.getElementById('deleteAnimalNameConfirm').textContent = name;
+
+                deleteAnimalModal.show();
+            });
+        });
+    }
+
+    // Evento para el botón de refrescar
+    refreshAnimalsBtn.addEventListener('click', loadAnimals);
+
+    // Búsqueda en la tabla (cliente-side)
+    const animalSearchInput = document.getElementById('animalSearchInput');
+    const animalSearchBtn = document.getElementById('animalSearchBtn');
+
+    animalSearchBtn.addEventListener('click', function() {
+        const searchTerm = animalSearchInput.value.toLowerCase();
+        const rows = animalsTableBody.querySelectorAll('tr');
+        rows.forEach(row => {
+            // Unir el texto de todas las celdas relevantes para la búsqueda
+            const rowText = Array.from(row.children).slice(2, 8).map(td => td.textContent.toLowerCase()).join(' '); // Nombre, Científico, Clase, Continente, Hábitat, Dieta
+            if (rowText.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
             }
         });
-     }
+    });
+
+    animalSearchInput.addEventListener('keyup', function() {
+        if (this.value.length > 2 || this.value.length === 0) {
+            animalSearchBtn.click();
+        }
+    });
+
+    // Cargar animales cuando el script se ejecute
+    loadAnimals();
 });
