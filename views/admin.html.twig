@@ -36,3 +36,213 @@
     {% endif %}
 </div>
 {% endblock %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - MyZoo</title>
+
+    {# Preconexión y Hojas de estilo existentes #}
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://unpkg.com">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" integrity="sha512-c42qTSw/wPZ3/5LBzD+Bw5fFbUJNUx3j+HaURHvzHpqEj8U7DnFE8gVxyfD5xXiz0MYmmOKdGy3q5mQjXUuRQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous"/>
+
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .zoo-header {
+            background-color: #4caf50;
+            color: white;
+            padding: 1rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .zoo-footer {
+            background-color: #354f30;
+            color: white;
+            padding: 2rem 0;
+            margin-top: auto;
+        }
+
+        .zoo-footer h5 {
+            color: #f1c40f;
+        }
+
+        .zoo-footer a {
+            text-decoration: none;
+            color: #aab7b8;
+        }
+
+        .zoo-footer a:hover {
+            color: #f1c40f;
+        }
+
+        .nav-item a {
+            color: white;
+        }
+
+        .nav-item a:hover {
+            color: #ffeb3b;
+        }
+
+        /* --- Estilos para el Panel de Administración --- */
+        .admin-main-container {
+            display: flex;
+            flex: 1;
+            background-color: #f4f4f4;
+        }
+
+        .admin-sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+            flex-shrink: 0;
+        }
+
+        .admin-sidebar h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #ecf0f1;
+        }
+
+        .admin-sidebar nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .admin-sidebar nav ul li {
+            margin-bottom: 10px;
+        }
+
+        .admin-sidebar nav ul li a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 12px 15px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+
+        .admin-sidebar nav ul li a i {
+            margin-right: 10px;
+        }
+
+        .admin-sidebar nav ul li a:hover,
+        .admin-sidebar nav ul li a.active {
+            background-color: #34495e;
+            color: #f1c40f;
+        }
+
+        .admin-content-area {
+            flex-grow: 1;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 5px rgba(0,0,0,0.05);
+            overflow-y: auto;
+        }
+
+        .admin-content-area h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        /* Fin de los estilos del Panel de Administración */
+    </style>
+</head>
+<body>
+    {% include 'header.html.twig' %}
+
+    {# Contenedor principal para el panel de administración #}
+    <div class="admin-main-container">
+        {# Panel lateral de navegación #}
+        <aside class="admin-sidebar">
+            <h2><i class="fas fa-cogs"></i> Admin Panel</h2>
+            <nav>
+                <ul>
+                    {# data-component es para JS. href para la URL normal (fallback/primera carga) #}
+                    <li><a href="/admin/users" class="nav-link {% if active_component == 'usuarioAdmin' %}active{% endif %}" data-component="usuarioAdmin"><i class="fas fa-users"></i> Usuarios</a></li>
+                    <li><a href="/admin/animales" class="nav-link {% if active_component == 'animalAdmin' %}active{% endif %}" data-component="animalAdmin"><i class="fas fa-paw"></i> Animales</a></li>
+                    <li><a href="/admin/noticias" class="nav-link {% if active_component == 'noticiaAdmin' %}active{% endif %}" data-component="noticiaAdmin"><i class="fas fa-newspaper"></i> Noticias</a></li>
+                    <li><a href="/admin/foro" class="nav-link {% if active_component == 'foroAdmin' %}active{% endif %}" data-component="foroAdmin"><i class="fas fa-comments"></i> Foros</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        {# Área de contenido principal, donde el JS cargará los componentes #}
+        <main class="admin-content-area">
+            {# Este div será el objetivo para inyectar el HTML de los componentes vía AJAX #}
+            <div id="admin-dynamic-content">
+                {% if active_component is defined and active_component is not null %}
+                    {# Si estamos en una URL de componente (ej. /admin/users) en la carga inicial, PHP incluye el componente #}
+                    {% include 'components/' ~ active_component ~ '.html.twig' %}
+                {% else %}
+                    {# Contenido por defecto cuando no se selecciona un componente (Dashboard) #}
+                    <h2><i class="fas fa-tachometer-alt"></i> Dashboard Administrativo</h2>
+                    {% if content_message is defined and content_message is not empty %}
+                        <div class="alert alert-info mt-4" role="alert">
+                            {{ content_message }}
+                        </div>
+                    {% else %}
+                        <p>Bienvenido al panel de administración de MyZoo. Utiliza el menú de la izquierda para navegar por las diferentes secciones de gestión.</p>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </main>
+    </div>
+
+    {% include 'footer.html.twig' %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+                integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+                crossorigin="anonymous"></script>
+
+    <script>
+        window.ChatWidgetConfig = {
+            webhook: {
+                url: 'http://localhost:5678/webhook/f406671e-c954-4691-b39a-66c90aa2f103/chat',
+                route: 'general'
+            },
+            branding: {
+                logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQPSJrGEYze4X7nk28BHpXE_XlAoeg_vmwynQ&s',
+                name: 'Zoo',
+                welcomeText: '¡Hola! 🦁🐵 ¿En qué puedo ayudarte hoy?',
+                responseTimeText: 'Respondemos en pocos minutos ⏳'
+            },
+            style: {
+                primaryColor: '#4CAF50',
+                secondaryColor: '#2E7D32',
+                position: 'right',
+                backgroundColor: '#FAF3E0',
+                fontColor: '#3E2723',
+                borderRadius: '15px',
+                buttonShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)',
+                chatBubbleColor: '#A5D6A7',
+                chatBubbleTextColor: '#1B5E20',
+                fontFamily: '"Poppins", sans-serif'
+            }
+        };
+    </script>
+    <script src="https://nocodeveloper.com/chat.js"></script>
+
+    {# Carga tu script admin.js aquí para la carga dinámica de componentes #}
+    {% block javascripts %}
+        <script src="/js/admin.js"></script>
+    {% endblock %}
+</body>
+</html>
