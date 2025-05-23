@@ -5,35 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyZoo</title>
 
-
-
-       {# Preconexión para mejor performance #}
+    {# Preconexión para mejor performance #}
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="preconnect" href="https://unpkg.com">
 
     {# Hojas de estilo externas #}
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
     
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
-          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
           crossorigin="anonymous" referrerpolicy="no-referrer" />
     
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" 
-          integrity="sha512-c42qTSw/wPZ3/5LBzD+Bw5fFbUJNUx3j+HaURHvzHpqEj8U7DnFE8gVxyfD5xXiz0MYmmOKdGy3q5mQjXUuRQ==" 
-          crossorigin="anonymous" referrerpolicy="no-referrer" />
-    
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
-          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
           crossorigin="anonymous"/>
-
-
-
 
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            padding:none;        }
+            padding:none;
+        }
 
        .zoo-header {
             background-color: #4caf50; /* Verde fuerte (tema natural) */
@@ -47,20 +39,18 @@
             padding: 2rem 0; /* Relleno en el footer */
         }
 
-            .zoo-footer h5 {
+        .zoo-footer h5 {
             color: #f1c40f; /* Color dorado para los títulos */
         }
 
-            .zoo-footer a {
+        .zoo-footer a {
             text-decoration: none; /* Elimina subrayado */
             color: #aab7b8; /* Color gris para los enlaces */
         }
 
-.zoo-footer a:hover {
-    color: #f1c40f; /* Color dorado en hover */
-}
-
-
+        .zoo-footer a:hover {
+            color: #f1c40f; /* Color dorado en hover */
+        }
 
         main {
             padding: 2rem;
@@ -82,7 +72,7 @@
         .noticia-container h3 {
             font-size: 1.8rem;
             color: #3a5a40; /* Verde oliva */
-        }home
+        }
 
         .noticia-container p {
             font-size: 1rem;
@@ -110,11 +100,6 @@
         {% block content %}{% endblock %}
     </main>
     {% include 'footer.html.twig' %}
-</body>
-
-
-
-
 
 
  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" 
@@ -149,6 +134,16 @@
     };
 </script>
        <script src="https://nocodeveloper.com/chat.js"></script>
-    
 
+       {# === ADD THIS BLOCK FOR PAGE-SPECIFIC JAVASCRIPTS === #}
+    {% block javascripts %}
+        {# Scripts placed here will be included at the end of the body #}
+        {# Use {{ parent() }} here if base.html.twig itself has scripts you want to keep #}
+    {% endblock %}
+    {# ====================================================== #}
+</body>
+    
+>>>>>>> 47681f718722320eb63a6f86a8caf01617e60a57
+
+</body>
 </html>

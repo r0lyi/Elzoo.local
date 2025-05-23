@@ -130,6 +130,48 @@ class UsuariosController {
         }
     }
 
+     public function changePassword($id) {
+        // Validar que el ID sea un número entero positivo
+        if (!filter_var($id, FILTER_VALIDATE_INT, array('options' => array('min_range' => 1)))) {
+            $this->sendErrorResponse("ID de usuario inválido para cambiar contraseña.", 400);
+            return;
+        }
+
+        $data = $this->getJsonRequestBody();
+
+        if ($data === null) {
+            return; // getJsonRequestBody ya maneja el error
+        }
+
+        // Validar que la nueva contraseña esté presente y no esté vacía
+        if (!isset($data->new_password) || trim($data->new_password) === '') {
+            $this->sendErrorResponse("El campo 'new_password' es requerido y no puede estar vacío.", 400);
+            return;
+        }
+
+        // Verificar si el usuario existe antes de intentar actualizar la contraseña
+        if (!Usuarios::find($id)) {
+            $this->sendErrorResponse("Usuario no encontrado para cambiar contraseña.", 404);
+            return;
+        }
+
+        // Hashear la nueva contraseña
+        $hashedPassword = password_hash(trim($data->new_password), PASSWORD_DEFAULT);
+
+        if ($hashedPassword === false) {
+             $this->sendErrorResponse("Error interno al procesar la nueva contraseña.", 500);
+             return;
+        }
+
+        $success = Usuarios::updatePassword($id, $hashedPassword);
+
+        if ($success) {
+            $this->sendJsonResponse(["message" => "Contraseña actualizada con éxito para el usuario ID: {$id}."], 200);
+        } else {
+            $this->sendErrorResponse("Error al actualizar la contraseña en la base de datos.", 500);
+        }
+    }
+
     // Maneja la solicitud PUT /api/v1/usuarios/{id}
     public function update($id) {
         // Validar que el ID sea un número entero positivo
@@ -240,21 +282,7 @@ class UsuariosController {
             $queryComments = "DELETE FROM comentarios_foro WHERE autor_id = ?";
             $stmtComments = $connection->prepare($queryComments);
             $stmtComments->execute([$id]); // Ejecuta la eliminación de comentarios
-            // Si hay un error de DB aquí, la PDOException lo capturará.
-            // Si el usuario no tiene comentarios, esto simplemente afectará 0 filas, lo cual es normal.
-
-            // IMPORTANTE: Si los comentarios también tienen una FK a los posts (comentarios_foro.foro_id -> foros.id),
-            // y esa FK NO tiene ON DELETE CASCADE, necesitarías eliminar los comentarios
-            // que pertenecen a los posts del usuario ANTES de eliminar los posts del usuario.
-            // Pero los errores que has mostrado hasta ahora solo indican dependencia DIRECTA de
-            // comentarios -> usuario y foros -> usuario. Si hay otras dependencias,
-            // el log de errores te mostrará la siguiente violación después de arreglar esta.
-            // El orden actual (comentarios del usuario -> posts del usuario -> usuario)
-            // es seguro si los comentarios solo dependen directamente del usuario (autor_id) y no del post (foro_id)
-            // para su eliminación en cascada. Si los comentarios dependen del post,
-            // eliminar los posts podría automáticamente eliminar sus comentarios asociados si la FK de foro_id tiene CASCADE.
-            // Asumiendo que los errores te guían paso a paso, el orden actual debería funcionar.
-
+           
 
             // --- PASO 3: Eliminar al usuario ---
             // Ahora que los posts de foro y comentarios (que son dependencias directas mostradas por los errores)

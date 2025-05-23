@@ -1,29 +1,5 @@
 <?php
-// routes/api.php - Ruteo API
 
-// Este archivo es incluido por public/index.php cuando la URL empieza con /api/v1/
-// NO DEBE INCLUIR CONTROLADORES NI MODELOS DIRECTAMENTE SI PUBLIC/INDEX.PHP YA LO HACE.
-// Asegúrate de que public/index.php incluye:
-// require_once $baseDir . 'models/Usuarios.php';
-// require_once $baseDir . 'models/ComentarioForo.php';
-// require_once $baseDir . 'models/Foro.php';
-// require_once $baseDir . 'models/Animales.php';
-// require_once $baseDir . 'models/Noticias.php'; // <<-- Ensure this line is in index.php!
-// require_once $baseDir . 'controllers/ControllerDatabase.php';
-// require_once $baseDir . 'controllers/http/UsuariosController.php';
-// require_once $baseDir . 'controllers/http/ComentarioForoController.php';
-// require_once $baseDir . 'controllers/http/ForoController.php';
-// require_once $baseDir . 'controllers/http/AnimalesController.php';
-// require_once $baseDir . 'controllers/http/NoticiasController.php'; // <<-- Ensure this line is in index.php!
-
-
-// Assume the following variables and classes are available from index.php's scope:
-// $requestMethod: The HTTP method (GET, POST, PUT, DELETE, OPTIONS)
-// $routeHandled: The boolean variable from index.php that we must set to true if a route is handled
-// Classes: Usuarios, ComentarioForo, Foro, Animales, Noticias, ControllerDatabase,
-//          UsuariosController, ComentarioForoController, ForoController, AnimalesController, NoticiasController
-
-// Recalculate $apiUri locally. This handles potential scope issues.
 $requestUriFromApiScope = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
 if (str_starts_with($requestUriFromApiScope, '/api/v1/')) {
@@ -50,10 +26,22 @@ $segment3 = $apiSegments[2] ?? null; // Could be a sub-resource or an ID in nest
 switch ($resource) {
     case 'usuarios':
         $userId = $segment2; // User ID
-        // Ensure the path is exactly /usuarios or /usuarios/{id} (no more segments)
-        if (count($apiSegments) <= 2) { // Path is /usuarios or /usuarios/{id}
-             // Controller must be included in public/index.php
-             $controller = new UsuariosController();
+        // Ensure the path is exactly /usuarios or /usuarios/{id} or /usuarios/{id}/password
+        
+        // Cargar el controlador de usuarios
+        $controller = new UsuariosController();
+
+        // Manejar la ruta específica para cambiar contraseña
+        if ($userId && $segment3 === 'password') {
+            if ($requestMethod === 'PUT') {
+                $controller->changePassword($userId);
+                $routeHandled = true;
+            } else {
+                http_response_code(405); // Method Not Allowed
+                echo json_encode(["message" => "Método " . $requestMethod . " no permitido para este endpoint de cambio de contraseña."]);
+                $routeHandled = true;
+            }
+        } elseif (count($apiSegments) <= 4) { // Path is /usuarios or /usuarios/{id} (or just /usuarios/{id} if segment3 is null)
              switch ($requestMethod) {
                  case 'GET':
                      if ($userId) { // GET /api/v1/usuarios/{id}
@@ -71,7 +59,8 @@ switch ($resource) {
                      }
                      break;
                  case 'PUT':
-                     if ($userId && is_numeric($userId)) { // Only PUT to /api/v1/usuarios/{id}
+                     // Asegúrate de que no es la ruta de password
+                     if ($userId && is_numeric($userId) && $segment3 !== 'password') { // Only PUT to /api/v1/usuarios/{id}
                          $controller->update($userId);
                          $routeHandled = true;
                      }
@@ -83,14 +72,13 @@ switch ($resource) {
                      }
                      break;
                  default:
-                      // Method not allowed for /usuarios or /usuarios/{id}
                       http_response_code(405);
                       echo json_encode(["message" => "Método " . $requestMethod . " no permitido para este endpoint de usuarios."]);
                       $routeHandled = true;
                      break;
              }
         }
-        // If count($apiSegments) > 2 (e.g., /usuarios/123/extra), it falls through to 404 below
+        // If count($apiSegments) > 4 (e.g., /usuarios/123/password/extra), it falls through to 404 below, which is correct
         break;
 
     case 'foros':

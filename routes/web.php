@@ -32,6 +32,15 @@ switch (true) {
         $routeHandled = true;
         break;
 
+            // Rutas para sub-secciones del panel de administración
+    // Ej: /admin/usuarios, /admin/animales, /admin/foro
+    case preg_match('#^/admin/([^/]+)$#', $request, $matches_admin_sub) === 1:
+        $adminSection = $matches_admin_sub[1]; // 'usuarios', 'animales', 'foro', etc.
+        require_once $controllerDir . 'ControllerAdmin.php';
+        admin($adminSection); // Pasar la sección al controlador admin
+        $routeHandled = true;
+        break;
+
     // Ruta foro: listado (GET /forum)
     case $request === '/forum':
         require_once $controllerDir . 'ControllerForo.php';

@@ -109,6 +109,13 @@ class Usuarios {
         return $stmt->execute([$id]);
     }
 
+    public static function updatePassword($id, $hashedPassword) {
+        $connection = ControllerDatabase::connect();
+        $query = "UPDATE usuarios SET password = ? WHERE id = ?";
+        $stmt = $connection->prepare($query);
+        return $stmt->execute([$hashedPassword, $id]);
+    }
+
     public static function verificarCorreoExistente($email) {
         $connection = ControllerDatabase::connect();
         $query = "SELECT * FROM usuarios WHERE email = :email";

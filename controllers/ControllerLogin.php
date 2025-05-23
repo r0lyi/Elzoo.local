@@ -34,7 +34,7 @@ function login() {
             // Payload con datos del usuario
             $payload = [
                 'sub' => $usuario['id'],
-                'exp' => time() + 3600 // 1 hora
+               // 'exp' => time() + 3600 // 1 hora
             ];
 
             // Generar y guardar el token
