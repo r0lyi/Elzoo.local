@@ -1,0 +1,123 @@
+{# templates/usuarios/usuarios.html.twig #}
+
+<div id="usuarios-component" class="container mt-4 mb-5 p-4 shadow-sm rounded-3 bg-white">
+    <h1 class="mb-4 text-center text-primary">
+        <i class="fas fa-users me-2"></i> Gestión de Usuarios
+    </h1>
+
+    {# Área de Mensajes #}
+    <div id="message-area" class="alert d-none" role="alert"></div>
+
+    <hr class="my-4">
+
+    {# Formulario para Crear/Editar Usuario #}
+    <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h2 class="card-title h5 mb-0">
+                <i class="fas fa-user-plus me-2"></i>
+                <span id="form-title-text">Crear Nuevo Usuario</span>
+            </h2>
+        </div>
+        <div class="card-body">
+            <form id="user-form">
+                <input type="hidden" id="user-id">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="nombre" class="form-label">Nombre:</label>
+                        <input type="text" id="nombre" class="form-control" placeholder="Ej: Juan Pérez" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="email" class="form-label">Email:</label>
+                        <input type="email" id="email" class="form-control" placeholder="Ej: juan.perez@example.com" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="password" class="form-label">Contraseña (solo para crear):</label>
+                        <input type="password" id="password" class="form-control" placeholder="Dejar vacío para no cambiar al editar">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="rol" class="form-label">Rol:</label>
+                        <select id="rol" class="form-select" required>
+                            <option value="usuario">Usuario</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end mt-4">
+                    <button type="submit" class="btn btn-primary me-2" id="save-user-btn">
+                        <i class="fas fa-save me-1"></i> Guardar Usuario
+                    </button>
+                    <button type="button" class="btn btn-secondary d-none" id="cancel-edit-btn">
+                        <i class="fas fa-times-circle me-1"></i> Cancelar Edición
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <hr class="my-4">
+
+    {# Tabla para Listar Usuarios #}
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-info text-white">
+            <h2 class="card-title h5 mb-0">
+                <i class="fas fa-list me-2"></i> Listado de Usuarios
+            </h2>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="users-table" class="table table-hover table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Rol</th>
+                            <th scope="col" class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {# Los datos de los usuarios se insertarán aquí dinámicamente con JavaScript #}
+                    </tbody>
+                </table>
+            </div>
+            <div id="no-users-message" class="alert alert-info text-center d-none" role="alert">
+                No hay usuarios registrados.
+            </div>
+        </div>
+    </div>
+
+    {# Modal para Cambiar Contraseña #}
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="changePasswordModalLabel">
+                        <i class="fas fa-key me-2"></i> Cambiar Contraseña de Usuario
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Cambiando contraseña para: <strong id="modal-user-name"></strong> (ID: <span id="modal-user-id"></span>)</p>
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">Nueva Contraseña:</label>
+                        <input type="password" class="form-control" id="newPassword" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmNewPassword" class="form-label">Confirmar Nueva Contraseña:</label>
+                        <input type="password" class="form-control" id="confirmNewPassword" required>
+                    </div>
+                    <div id="password-modal-message-area" class="alert d-none" role="alert"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="saveNewPasswordBtn">
+                        <i class="fas fa-unlock-alt me-1"></i> Guardar Contraseña
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {# El script JavaScript se incluye aquí. Asegúrate de que la ruta sea correcta. #}
+    <script src="/js/usuarios.js"></script>
+</div>

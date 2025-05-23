@@ -2,7 +2,7 @@
 // public/index.php - Punto de entrada principal y despachador de rutas
 
 // Obtener la ruta de la solicitud
-$requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH); // Usar requestUri para consistencia
+$request = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH); // Ahora se llama $request
 $requestMethod = $_SERVER['REQUEST_METHOD']; // Obtener también el método HTTP
 
 // Define rutas base para directorios (ajusta según tu estructura)
@@ -18,7 +18,7 @@ $routeHandled = false; // Esta variable será seteada a true dentro de api.php o
 // --- Decidir qué archivo de rutas cargar ---
 
 // Si la solicitud empieza con /api/v1/, cargamos el enrutador API
-if (str_starts_with($requestUri, '/api/v1/')) {
+if (str_starts_with($request, '/api/v1/')) {
 
     // --- Configuración específica para API ---
     header("Access-Control-Allow-Origin: *"); // Permite peticiones desde cualquier origen (CORS) - Ajusta para producción
@@ -54,7 +54,7 @@ if (str_starts_with($requestUri, '/api/v1/')) {
 
     // Eliminar el prefijo /api/v1/ de la ruta para que api.php trabaje con la parte restante
     // Asume que /api/v1/ está justo después de la base del sitio o el subdirectorio público
-    $apiUri = substr($requestUri, strlen('/api/v1'));
+    $apiUri = substr($$request, strlen('/api/v1'));
     $apiUri = trim($apiUri, '/'); // Eliminar la barra inicial/final si queda
 
     // Incluir el archivo de rutas de la API (está en la raíz del proyecto)
