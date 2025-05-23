@@ -16,7 +16,7 @@ class Animales {
     private $informacion;
     private $sabias;
     private $imagen; // Asumimos que almacena la ruta o URL de la imagen
-    private $fecha_nacimiento; // Asumimos que es un campo de fecha/hora
+    private $fecha_registro; // Asumimos que es un campo de fecha/hora
  
 
     // Mantener __construct existente
@@ -41,7 +41,7 @@ class Animales {
     public function getInformacion() { return $this->informacion; }
     public function getSabias() { return $this->sabias; }
     public function getImagen() { return $this->imagen; }
-    public function getFechaNacimiento() { return $this->fecha_nacimiento; }
+    public function getFechaRegistro() { return $this->fecha_registro; }
 
     // Mantener Setters existentes
     public function setNombre($nombre) { $this->nombre = $nombre; }
@@ -55,7 +55,7 @@ class Animales {
     public function setInformacion($informacion) { $this->informacion = $informacion; }
     public function setSabias($sabias) { $this->sabias = $sabias; }
     public function setImagen($imagen) { $this->imagen = $imagen; } // Nota: la subida/gestión de archivos de imagen es compleja y no se maneja solo con este método
-    public function setFechaNacimiento($fecha_nacimiento) { $this->fecha_nacimiento = $fecha_nacimiento; }
+    public function setFechaRegistro($fecha_registro) { $this->fecha_registro = $fecha_registro; }
 
     // Mantener método 'getAnimales' existente (retorna OBJETOS Animales)
     // Método para obtener todos los animales (Retorna OBJETOS Animales)
@@ -96,95 +96,100 @@ class Animales {
         return null;
     }
 
-    // --- Nuevos Métodos estáticos para API CRUD (retornan arrays asociativos o IDs) ---
+     // --- Métodos estáticos para API CRUD (retornan arrays asociativos o IDs) ---
 
     // Encontrar un animal por su ID (retorna array asociativo o null)
-    // Versión API-friendly
     public static function find($id): ?array {
         $db = ControllerDatabase::connect();
+        if ($db === null) {
+            error_log("Database connection failed in Animales::find");
+            return null;
+        }
         $stmt = $db->prepare("SELECT * FROM animales WHERE id = ?");
         $stmt->execute([$id]);
         $animal = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $animal ?: null; // Retorna null si no se encuentra
+        return $animal ?: null;
     }
 
-     // Encontrar todos los animales (retorna array de arrays asociativos)
-     // Versión API-friendly
+    // Encontrar todos los animales (retorna array de arrays asociativos)
     public static function findAll(): array {
         $db = ControllerDatabase::connect();
-        // Ordenar por ID ascendente por consistencia en la API
+        if ($db === null) {
+            error_log("Database connection failed in Animales::findAll");
+            return [];
+        }
         $stmt = $db->query("SELECT * FROM animales ORDER BY id ASC");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC); // Retorna arrays asociativos
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     // Crear nuevo animal a partir de un array de datos (retorna el ID del nuevo animal o false)
-    // Más adecuado para recibir datos JSON en la API
     public static function create(array $data): int|false {
         $db = ControllerDatabase::connect();
-        // Define los campos posibles que se pueden insertar
-        $allowedFields = ['nombre', 'nombre_cientifico', 'clase', 'continente', 'habitat', 'dieta', 'peso', 'tamano', 'informacion', 'sabias', 'imagen', 'fecha_nacimiento'];
+        if ($db === null) {
+            error_log("Database connection failed in Animales::create");
+            return false;
+        }
+        $allowedFields = ['nombre', 'nombre_cientifico', 'clase', 'continente', 'habitat', 'dieta', 'peso', 'tamano', 'informacion', 'sabias_que', 'imagen', 'fecha_registro'];
 
         $insertFields = [];
         $placeholders = [];
         $values = [];
 
         foreach ($allowedFields as $field) {
-            // Solo incluir campos presentes en el array de datos
-            // (La validación de campos requeridos se hará en el controlador)
             if (isset($data[$field])) {
-                $insertFields[] = "`{$field}`"; // Usar backticks por si hay nombres de columna reservados
-                $placeholders[] = ":{$field}"; // Usar placeholders nombrados
-                $values[":{$field}"] = $data[$field]; // Almacenar el valor asociado al placeholder
+                $insertFields[] = "`{$field}`";
+                $placeholders[] = ":{$field}";
+                $values[":{$field}"] = $data[$field];
             }
         }
 
         if (empty($insertFields)) {
-            // No se proporcionaron datos válidos para insertar
-            return false; // O lanzar una excepción
+            error_log("No valid fields provided for Animales::create");
+            return false;
         }
 
-        // Construir la consulta INSERT
         $sql = "INSERT INTO animales (" . implode(', ', $insertFields) . ") VALUES (" . implode(', ', $placeholders) . ")";
         $stmt = $db->prepare($sql);
 
         try {
              $result = $stmt->execute($values);
-             return $result ? $db->lastInsertId() : false; // Retorna el ID del nuevo animal si fue exitoso
+             return $result ? $db->lastInsertId() : false;
         } catch (PDOException $e) {
-            // Loggear el error real de la base de datos para depuración
             error_log("Database error in Animales::create: " . $e->getMessage());
-            return false; // Indica fallo
+            return false;
         }
     }
 
-    // Actualizar un animal por ID (permite actualización parcial)
-    // Recibe un array de datos con los campos a actualizar
+    // Actualizar un animal por ID (permite actualización parcial de CUALQUIER campo)
     public static function update(int $id, array $data): bool {
          $db = ControllerDatabase::connect();
+         if ($db === null) {
+            error_log("Database connection failed in Animales::update");
+            return false;
+         }
 
-         // Define todos los campos posibles que se pueden actualizar desde la API
-         $allowedFields = ['nombre', 'nombre_cientifico', 'clase', 'continente', 'habitat', 'dieta', 'peso', 'tamano', 'informacion', 'sabias', 'imagen', 'fecha_nacimiento'];
+         // Define explícitamente todos los campos que pueden ser actualizados
+         $allowedFields = ['nombre', 'nombre_cientifico', 'clase', 'continente', 'habitat', 'dieta', 'peso', 'tamano', 'informacion', 'sabias_que', 'imagen', 'fecha_registro'];
 
          $updateFields = [];
          $values = [];
 
          foreach ($allowedFields as $field) {
-            // Solo incluir campos presentes en el array de datos Y que están permitidos
-            // La validación de formatos específicos (ej: numérico, fecha) se hará en el controlador
-            if (isset($data[$field])) {
-                $updateFields[] = "`{$field}` = :{$field}"; // Usar placeholders nombrados
-                $values[":{$field}"] = $data[$field]; // Almacenar el valor asociado
+            // Solo incluir campos presentes en el array de datos
+            // Y no incluir 'id' en la actualización de campos
+            if (array_key_exists($field, $data) && $field !== 'id') { // Usar array_key_exists para permitir nulls o vacíos
+                $updateFields[] = "`{$field}` = :{$field}";
+                $values[":{$field}"] = $data[$field];
             }
          }
 
          if (empty($updateFields)) {
-             // No se proporcionaron campos válidos para actualizar
-             return false; // O lanzar una excepción
+             // No se proporcionaron campos válidos para actualizar o solo se intentó actualizar el ID
+             return false;
          }
 
-         // Construir la consulta UPDATE
          $sql = "UPDATE animales SET " . implode(', ', $updateFields) . " WHERE id = :id";
-         $values[":id"] = $id; // Añadir el ID al array de valores
+         $values[":id"] = $id;
 
          $stmt = $db->prepare($sql);
 
@@ -192,31 +197,80 @@ class Animales {
              return $stmt->execute($values);
          } catch (PDOException $e) {
              error_log("Database error in Animales::update: " . $e->getMessage());
-             return false; // Indica fallo
+             return false;
          }
     }
 
     // Eliminar un animal por ID
-    // NOTA: Si otras tablas (ej: ubicaciones_animal, registro_medico) tienen claves foráneas que referencian animales.id,
-    // DEBES manejar esas dependencias antes de eliminar al animal (eliminarlas primero o configurar ON DELETE CASCADE en la BD).
-    // De lo contrario, obtendrás un error de restricción de integridad.
     public static function delete(int $id): bool {
         $db = ControllerDatabase::connect();
+        if ($db === null) {
+            error_log("Database connection failed in Animales::delete");
+            return false;
+        }
         $sql = "DELETE FROM animales WHERE id = ?";
         $stmt = $db->prepare($sql);
         try {
-            // execute devuelve true si la consulta se ejecutó sin errores de DB (incluso si 0 filas afectadas)
             return $stmt->execute([$id]);
         } catch (PDOException $e) {
-            // Loggear el error de base de datos (importante para depurar si hay problemas de FK)
             error_log("Database error in Animales::delete: " . $e->getMessage());
-            // Si el error es una violación de restricción de integridad (SQLSTATE 23000),
-            // significa que hay dependencias que impiden la eliminación.
-            // Podemos verificar el código de error si queremos un manejo más específico,
-            // pero por ahora, simplemente devolvemos false en caso de cualquier error de DB.
-            return false; // Indica fallo en la eliminación (posiblemente por FK)
+            return false;
         }
     }
 
-    // Puedes añadir otros métodos útiles aquí si los necesitas (ej: findByHabitat, findByClase)
+    /**
+     * Filtra animales según los criterios proporcionados.
+     * @param array $filters Array asociativo con los filtros (ej. ['clase' => 'Mamífero', 'continente' => 'África']).
+     * @return array Array de arrays asociativos de animales que cumplen con los filtros.
+     */
+    public static function filter(array $filters): array {
+        $db = ControllerDatabase::connect();
+        if ($db === null) {
+            error_log("Database connection failed in Animales::filter");
+            return [];
+        }
+
+        $allowedFilters = ['id', 'nombre', 'nombre_cientifico', 'clase', 'continente', 'habitat', 'dieta', 'peso', 'tamano', 'fecha_registro'];
+        $whereClauses = [];
+        $values = [];
+
+        foreach ($filters as $key => $value) {
+            if (in_array($key, $allowedFilters) && $value !== null && $value !== '') {
+                // Usar LIKE para búsquedas parciales en campos de texto, e.g., nombre
+                if (in_array($key, ['nombre', 'nombre_cientifico', 'clase', 'continente', 'habitat', 'dieta'])) {
+                    $whereClauses[] = "`{$key}` LIKE :{$key}";
+                    $values[":{$key}"] = '%' . $value . '%';
+                } elseif (in_array($key, ['peso', 'tamano'])) {
+                    // Para números, se espera un valor exacto o rango en el futuro (si se extiende)
+                    // Por ahora, búsqueda exacta para numéricos.
+                    $whereClauses[] = "`{$key}` = :{$key}";
+                    $values[":{$key}"] = $value;
+                } elseif ($key === 'fecha_registro') {
+                    // Para fechas, se espera un valor exacto.
+                    $whereClauses[] = "`{$key}` = :{$key}";
+                    $values[":{$key}"] = $value;
+                } else {
+                    // Para otros campos (como ID), búsqueda exacta
+                    $whereClauses[] = "`{$key}` = :{$key}";
+                    $values[":{$key}"] = $value;
+                }
+            }
+        }
+
+        $sql = "SELECT * FROM animales";
+        if (!empty($whereClauses)) {
+            $sql .= " WHERE " . implode(' AND ', $whereClauses);
+        }
+        $sql .= " ORDER BY id ASC"; // Asegurar orden consistente
+
+        $stmt = $db->prepare($sql);
+
+        try {
+            $stmt->execute($values);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Database error in Animales::filter: " . $e->getMessage());
+            return [];
+        }
+    }
 }
