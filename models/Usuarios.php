@@ -160,4 +160,10 @@ class Usuarios {
         $stmt = $connection->prepare($query);
         return $stmt->execute([$id]);
     }
+
+     public static function esAdmin(int $userId): bool {
+        $user = self::obtenerPorId($userId); // Use the existing method to get user data
+        // Check if user exists and their 'rol' is 'admin'
+        return ($user && $user['rol'] === 'admin');
+    }
 }

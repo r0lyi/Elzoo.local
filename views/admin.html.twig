@@ -1,3 +1,5 @@
+{# templates/admin.html.twig #}
+
 {% extends 'base.html.twig' %}
 
 {% block content %}
@@ -5,7 +7,6 @@
     {% if is_authenticated %}
         <h2 class="mb-4 text-success text-center">Panel de Administración</h2>
 
-        <!-- Tabs de administración -->
         <ul class="nav nav-tabs" id="adminTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="usuarios-tab" data-bs-toggle="tab" data-bs-target="#usuarios" type="button" role="tab">Usuarios</button>
@@ -15,6 +16,10 @@
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="foros-tab" data-bs-toggle="tab" data-bs-target="#foros" type="button" role="tab">Foros</button>
+            </li>
+            {# Nueva opción para Noticias #}
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="noticias-tab" data-bs-toggle="tab" data-bs-target="#noticias" type="button" role="tab">Noticias</button>
             </li>
         </ul>
 
@@ -27,6 +32,10 @@
             </div>
             <div class="tab-pane fade" id="foros" role="tabpanel">
                 {% include 'admin/foros.html.twig' %}
+            </div>
+            {# Contenido para la sección de Noticias #}
+            <div class="tab-pane fade" id="noticias" role="tabpanel">
+                {% include 'admin/noticias.html.twig' %}
             </div>
         </div>
     {% else %}
