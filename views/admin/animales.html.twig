@@ -1,8 +1,207 @@
-{# Gestión de animales #}
-<h2>Animales</h2>
-<ul>
-  <li>Perro – Fido <button>Editar</button> <button>Eliminar</button></li>
-  <li>Gato – Michi <button>Editar</button> <button>Eliminar</button></li>
-  <!-- ... -->
-</ul>
-<button>Agregar animal</button>
+{# templates/animales/animales.html.twig #}
+
+<div id="animales-component" class="container mt-4 mb-5 p-4 shadow-sm rounded-3 bg-white">
+    <h1 class="mb-4 text-center text-success">
+        <i class="fas fa-paw me-2"></i> Gestión de Animales
+    </h1>
+
+    {# Área de Mensajes #}
+    <div id="message-area" class="alert d-none" role="alert"></div>
+
+    <hr class="my-4">
+
+    {# Formulario para Crear/Editar Animal #}
+    <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-header bg-success text-white">
+            <h2 class="card-title h5 mb-0">
+                <i class="fas fa-plus-circle me-2"></i>
+                <span id="form-title-text">Registrar Nuevo Animal</span>
+            </h2>
+        </div>
+        <div class="card-body">
+            <form id="animal-form">
+                <input type="hidden" id="animal-id">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="nombre" class="form-label">Nombre Común:</label>
+                        <input type="text" id="nombre" class="form-control" placeholder="Ej: León" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="nombre_cientifico" class="form-label">Nombre Científico:</label>
+                        <input type="text" id="nombre_cientifico" class="form-control" placeholder="Ej: Panthera leo" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="clase" class="form-label">Clase:</label>
+                        <input type="text" id="clase" class="form-control" placeholder="Ej: Mamífero" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="continente" class="form-label">Continente:</label>
+                        <input type="text" id="continente" class="form-control" placeholder="Ej: África, Asia" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="habitat" class="form-label">Hábitat:</label>
+                        <input type="text" id="habitat" class="form-control" placeholder="Ej: Sabana" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="dieta" class="form-label">Dieta:</label>
+                        <input type="text" id="dieta" class="form-control" placeholder="Ej: Carnívoro" required>
+                    </div>
+                    <div class="col-12">
+                        <label for="informacion" class="form-label">Información:</label>
+                        <textarea id="informacion" class="form-control" rows="3" placeholder="Información detallada sobre el animal..." required></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="imagen" class="form-label">URL Imagen:</label>
+                        <input type="url" id="imagen" class="form-control" placeholder="Ej: http://ejemplo.com/leon.jpg" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="peso" class="form-label">Peso (kg):</label>
+                        <input type="number" id="peso" class="form-control" placeholder="Ej: 190" step="0.1">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="tamano" class="form-label">Tamaño (m):</label>
+                        <input type="number" id="tamano" class="form-control" placeholder="Ej: 1.2" step="0.1">
+                    </div>
+                    {# Fecha de Registro - Solo se muestra, es de solo lectura y el backend la asigna #}
+                    <div class="col-md-6">
+                        <label for="fecha_registro" class="form-label">Fecha de Registro:</label>
+                        <input type="text" id="fecha_registro" class="form-control" readonly placeholder="Se asigna automáticamente al crear">
+                    </div>
+                    <div class="col-12">
+                        <label for="sabias_que" class="form-label">Sabías que... (curiosidades):</label>
+                        <textarea id="sabias_que" class="form-control" rows="2" placeholder="Hechos interesantes sobre el animal..."></textarea>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end mt-4">
+                    <button type="submit" class="btn btn-success me-2" id="save-animal-btn">
+                        <i class="fas fa-save me-1"></i> Guardar Animal
+                    </button>
+                    <button type="button" class="btn btn-secondary d-none" id="cancel-edit-btn">
+                        <i class="fas fa-times-circle me-1"></i> Cancelar Edición
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <hr class="my-4">
+
+    {# Sección de Filtrado de Animales #}
+    <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h2 class="card-title h5 mb-0">
+                <i class="fas fa-filter me-2"></i> Filtrar Animales
+            </h2>
+        </div>
+        <div class="card-body">
+            <form id="filter-form" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label for="filter-nombre" class="form-label">Nombre:</label>
+                    <input type="text" id="filter-nombre" class="form-control" placeholder="Ej: León">
+                </div>
+                <div class="col-md-4">
+                    <label for="filter-clase" class="form-label">Clase:</label>
+                    <input type="text" id="filter-clase" class="form-control" placeholder="Ej: Mamífero">
+                </div>
+                <div class="col-md-4">
+                    <label for="filter-continente" class="form-label">Continente:</label>
+                    <input type="text" id="filter-continente" class="form-control" placeholder="Ej: África">
+                </div>
+                <div class="col-md-4">
+                    <label for="filter-dieta" class="form-label">Dieta:</label>
+                    <input type="text" id="filter-dieta" class="form-control" placeholder="Ej: Carnívoro">
+                </div>
+                <div class="col-md-4">
+                    <label for="filter-peso" class="form-label">Peso (kg):</label>
+                    <input type="number" id="filter-peso" class="form-control" placeholder="Ej: 150" step="0.1">
+                </div>
+                <div class="col-md-4">
+                    <label for="filter-tamano" class="form-label">Tamaño (m):</label>
+                    <input type="number" id="filter-tamano" class="form-control" placeholder="Ej: 1.0" step="0.1">
+                </div>
+                <div class="col-12 d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary me-2" id="apply-filter-btn">
+                        <i class="fas fa-search me-1"></i> Aplicar Filtro
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="clear-filter-btn">
+                        <i class="fas fa-redo me-1"></i> Limpiar Filtro
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <hr class="my-4">
+
+    {# Tabla para Listar Animales #}
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-info text-white">
+            <h2 class="card-title h5 mb-0">
+                <i class="fas fa-list me-2"></i> Listado de Animales
+            </h2>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="animals-table" class="table table-hover table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Imagen</th> {# Nueva columna para la imagen #}
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Científico</th>
+                            <th scope="col">Clase</th>
+                            <th scope="col">Continente</th>
+                            <th scope="col" class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {# Los datos de los animales se insertarán aquí dinámicamente con JavaScript #}
+                    </tbody>
+                </table>
+            </div>
+            <div id="no-animals-message" class="alert alert-info text-center d-none" role="alert">
+                No hay animales registrados que coincidan con los criterios.
+            </div>
+        </div>
+    </div>
+
+    {# Modal para Ver Detalles del Animal #}
+    <div class="modal fade" id="animalDetailsModal" tabindex="-1" aria-labelledby="animalDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="animalDetailsModalLabel">
+                        <i class="fas fa-info-circle me-2"></i> Detalles del Animal
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-3">
+                        <img id="modal-animal-image" src="" alt="Imagen del Animal" class="img-fluid rounded shadow-sm" style="max-height: 250px; object-fit: cover;">
+                    </div>
+                    <h4 class="text-center text-success" id="modal-animal-name"></h4>
+                    <p class="text-center text-muted" id="modal-animal-scientific-name"></p>
+                    <hr>
+                    <p><strong>ID:</strong> <span id="modal-animal-id"></span></p>
+                    <p><strong>Clase:</strong> <span id="modal-animal-clase"></span></p>
+                    <p><strong>Continente:</strong> <span id="modal-animal-continente"></span></p>
+                    <p><strong>Hábitat:</strong> <span id="modal-animal-habitat"></span></p>
+                    <p><strong>Dieta:</strong> <span id="modal-animal-dieta"></span></p>
+                    <p><strong>Peso:</strong> <span id="modal-animal-peso"></span> kg</p>
+                    <p><strong>Tamaño:</strong> <span id="modal-animal-tamano"></span> m</p>
+                    <p><strong>Fecha de Registro:</strong> <span id="modal-animal-fecha-registro"></span></p> {# Renombrado #}
+                    <h6 class="mt-3">Información General:</h6>
+                    <p id="modal-animal-informacion" class="text-justify"></p>
+                    <h6 class="mt-3">¿Sabías que...?</h6>
+                    <p id="modal-animal-sabias-que" class="fst-italic"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {# El script JavaScript se incluye aquí. Asegúrate de que la ruta sea correcta. #}
+    <script src="/js/animales.js"></script>
+</div>

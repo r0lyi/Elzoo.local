@@ -200,69 +200,91 @@ switch ($resource) {
         break;
 
     case 'animales':
-         $animalId = $segment2; // Animal ID (could be null for /animales)
+        // **IMPORTANTE**: Evaluar primero las rutas más específicas
+        // Si el segundo segmento es 'filter', maneja la ruta de filtro
+        if (isset($segment2) && $segment2 === 'filter') {
+            $controller = new AnimalesController();
+            if ($requestMethod === 'GET') {
+                $controller->filter();
+                $routeHandled = true;
+            } else {
+                http_response_code(405); // Método no permitido
+                echo json_encode(["message" => "Método " . $requestMethod . " no permitido para /api/v1/animales/filter."]);
+                $routeHandled = true;
+            }
+            break; // Salir del switch 'animales' después de manejar 'animales/filter'
+        }
 
-         // Handle /api/v1/animales and /api/v1/animales/{id}
-         // Ensure the path is exactly /animales or /animales/{id} (no more segments)
-         if (count($apiSegments) <= 2) { // Path is /animales or /animales/{id}
-              // Ensure that if there is an ID (segment2), it is numeric
-              if ($animalId && !is_numeric($animalId)) {
-                   // If there is a second segment but it's NOT numeric (e.g., /animales/abc), it's an invalid route
-                   http_response_code(400); // Bad Request
-                   echo json_encode(["message" => "ID de animal inválido en la ruta."]);
-                   $routeHandled = true;
-              } else {
-                // Controller must be included in public/index.php
-                 $controller = new AnimalesController();
+        // --- Lógica Existente para CRUD de Animales (/animales y /animales/{id}) ---
 
-                 switch ($requestMethod) {
-                     case 'GET':
-                          if ($animalId) { // GET /api/v1/animales/{id}
-                              $controller->show($animalId); // $animalId already validated as numeric above
-                          } elseif (count($apiSegments) === 1) { // GET /api/v1/animales
-                               $controller->index();
-                          } // If $animalId is null and count>1 (e.g. /animales/extra), falls through to general 404
-                          $routeHandled = true; // If reached here, GET was handled or will fall through to 404
-                          break;
-                     case 'POST':
-                          if (!$animalId && count($apiSegments) === 1) { // Only POST to /api/v1/animales
-                               $controller->store();
-                               $routeHandled = true;
-                          } // If there is an ID or more segments, falls through to 404 o 405
-                           // Optional: Handle POST to /animales/{id} with 405 or 404? Current logic falls through.
-                          break;
-                     case 'PUT':
-                          if ($animalId && is_numeric($animalId)) { // Only PUT to /api/v1/animales/{id}
-                               $controller->update($animalId); // $animalId already validated as numeric
-                               $routeHandled = true;
-                          } // If no ID, falls through to 404 o 405
-                           // Optional: Handle PUT to /animales with 405? Current logic falls through.
-                          break;
-                     case 'DELETE':
-                          if ($animalId && is_numeric($animalId)) { // Only DELETE to /api/v1/animales/{id}
-                               $controller->destroy($animalId); // $animalId already validated as numeric
-                               $routeHandled = true;
-                          } // If no ID, falls through to 404 o 405
-                           // Optional: Handle DELETE to /animales with 405? Current logic falls through.
-                          break;
-                     default:
-                          // Method not allowed for /animales or /animales/{id}
-                           // If $routeHandled is not true, this route didn't match the shape *and* method.
-                           // This default handles methods not allowed for the *matched* shapes (/animales, /animales/{id}).
-                           // If the shape didn't match either (/animales/extra), it falls through.
-                          if (!$routeHandled) { // Ensure we only handle 405 if the shape was /animales or /animales/{id} but method was wrong
-                              http_response_code(405);
-                              echo json_encode(["message" => "Método " . $requestMethod . " no permitido para este endpoint de animales."]);
-                              $routeHandled = true;
-                          }
-                         break;
-                 }
-               // Add an extra check: if count($apiSegments) is 1 or 2, but $routeHandled is still false, it means the method wasn't allowed for that shape. The default case above handles this.
-              }
-         }
-         // If the path starts with /animales but doesn't match /animales or /animales/{id},
-         // it is not handled here and falls through to the general 404.
-         break;
+        $animalId = $segment2; // Animal ID (could be null for /animales)
+
+        // Validar que si hay un ID, sea numérico
+        if ($animalId && !is_numeric($animalId)) {
+            http_response_code(400); // Bad Request
+            echo json_encode(["message" => "ID de animal inválido en la ruta."]);
+            $routeHandled = true;
+            break; // Salir si el ID es inválido
+        }
+
+        // Si hay un tercer segmento, es una ruta inválida para CRUD básico
+        if (isset($segment3)) {
+            // Esto cubrirá casos como /animales/123/extra
+            http_response_code(404); // Not Found
+            echo json_encode(["message" => "Ruta no encontrada para animales."]);
+            $routeHandled = true;
+            break;
+        }
+
+        // Si llegamos aquí, la ruta es /animales o /animales/{id}
+        $controller = new AnimalesController();
+
+        switch ($requestMethod) {
+            case 'GET':
+                if ($animalId) { // GET /api/v1/animales/{id}
+                    $controller->show($animalId);
+                } else { // GET /api/v1/animales
+                    $controller->index();
+                }
+                $routeHandled = true;
+                break;
+            case 'POST':
+                if (!$animalId) { // Only POST to /api/v1/animales
+                    $controller->store();
+                    $routeHandled = true;
+                } else { // POST to /api/v1/animales/{id} is not allowed
+                    http_response_code(405);
+                    echo json_encode(["message" => "Método POST no permitido para /api/v1/animales/{id}."]);
+                    $routeHandled = true;
+                }
+                break;
+            case 'PUT':
+                if ($animalId) { // Only PUT to /api/v1/animales/{id}
+                    $controller->update($animalId);
+                    $routeHandled = true;
+                } else { // PUT to /api/v1/animales is not allowed
+                    http_response_code(405);
+                    echo json_encode(["message" => "Método PUT requiere un ID para /api/v1/animales/{id}."]);
+                    $routeHandled = true;
+                }
+                break;
+            case 'DELETE':
+                if ($animalId) { // Only DELETE to /api/v1/animales/{id}
+                    $controller->destroy($animalId);
+                    $routeHandled = true;
+                } else { // DELETE to /api/v1/animales is not allowed
+                    http_response_code(405);
+                    echo json_encode(["message" => "Método DELETE requiere un ID para /api/v1/animales/{id}."]);
+                    $routeHandled = true;
+                }
+                break;
+            default:
+                http_response_code(405); // Método no permitido para esta ruta base
+                echo json_encode(["message" => "Método " . $requestMethod . " no permitido para este endpoint."]);
+                $routeHandled = true;
+                break;
+        }
+        break; // Salir del switch principal 'segment1'
 
     case 'noticias': // Caso para Noticias
          $noticiaId = $segment2; // ID de Noticia (puede ser null para /noticias)
