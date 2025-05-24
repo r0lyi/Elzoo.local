@@ -1,0 +1,116 @@
+{# templates/admin/noticias.html.twig #}
+
+<div id="noticias-component" class="container mt-4 mb-5 p-4 shadow-sm rounded-3 bg-white">
+    <h1 class="mb-4 text-center text-primary">
+        <i class="fas fa-newspaper me-2"></i> Gestión de Noticias
+    </h1>
+
+    {# Área de Mensajes #}
+    <div id="message-area" class="alert d-none" role="alert"></div>
+
+    <hr class="my-4">
+
+    {# Formulario para Crear/Editar Noticias #}
+    <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h2 class="card-title h5 mb-0">
+                <i class="fas fa-plus-circle me-2"></i>
+                <span id="form-title-text">Crear Nueva Noticia</span>
+            </h2>
+        </div>
+        <div class="card-body">
+            <form id="noticia-form">
+                <input type="hidden" id="noticia-id"> {# Campo oculto para el ID en caso de edición #}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="titulo" class="form-label">Título:</label>
+                        <input type="text" id="titulo" name="titulo" class="form-control" placeholder="Título de la noticia" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="fecha_publicacion" class="form-label">Fecha de Publicación:</label>
+                        {# Usar type="datetime-local" para facilitar la entrada de fecha y hora #}
+                        <input type="datetime-local" id="fecha_publicacion" name="fecha_publicacion" class="form-control" required>
+                    </div>
+                    <div class="col-12">
+                        <label for="descripcion" class="form-label">Descripción:</label>
+                        <textarea id="descripcion" name="descripcion" class="form-control" rows="3" placeholder="Contenido breve de la noticia" required></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="url_origen" class="form-label">URL Origen:</label>
+                        <input type="url" id="url_origen" name="url_origen" class="form-control" placeholder="URL de la fuente original (opcional)">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="imagen" class="form-label">URL Imagen:</label>
+                        <input type="url" id="imagen" name="imagen" class="form-control" placeholder="URL de la imagen (ej: https://ejemplo.com/imagen.jpg)">
+                        {# Nota: Si 'imagen' es una subida de archivo, este input debería ser type="file"
+                           y el JS y la API deberían manejar FormData en lugar de JSON directamente para la subida.
+                           Para simplicidad, aquí se asume URL de imagen. #}
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end mt-4">
+                    <button type="submit" class="btn btn-primary me-2" id="save-noticia-btn">
+                        <i class="fas fa-save me-1"></i> Guardar Noticia
+                    </button>
+                    <button type="button" class="btn btn-secondary d-none" id="cancel-edit-btn">
+                        <i class="fas fa-times-circle me-1"></i> Cancelar Edición
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <hr class="my-4">
+
+    {# Sección de Búsqueda de Noticias #}
+    <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-header bg-info text-white">
+            <h2 class="card-title h5 mb-0">
+                <i class="fas fa-search me-2"></i> Buscar Noticias
+            </h2>
+        </div>
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-12">
+                    <label for="search-input" class="form-label visually-hidden">Buscar</label>
+                    <input type="text" id="search-input" class="form-control form-control-lg" placeholder="Buscar por título o descripción...">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-4">
+
+    {# Tabla para Listar Noticias #}
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-secondary text-white">
+            <h2 class="card-title h5 mb-0">
+                <i class="fas fa-list-alt me-2"></i> Listado de Noticias
+            </h2>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="noticias-table" class="table table-hover table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Título</th>
+                            <th scope="col">Descripción</th>
+                            <th scope="col">Fecha Pub.</th>
+                            <th scope="col">URL Origen</th>
+                            <th scope="col">Imagen</th>
+                            <th scope="col" class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {# Las noticias se cargarán aquí dinámicamente con JavaScript #}
+                    </tbody>
+                </table>
+            </div>
+            <div id="no-noticias-message" class="alert alert-info text-center mt-3 d-none" role="alert">
+                No hay noticias registradas que coincidan con los criterios.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/js/noticias.js"></script>

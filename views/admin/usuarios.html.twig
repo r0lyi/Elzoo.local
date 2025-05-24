@@ -10,7 +10,7 @@
 
     <hr class="my-4">
 
-    {# Formulario para Crear/Editar Usuario #}
+    {# Formulario para Crear/Editar Usuario - This seems to be the main form on the page, not a modal #}
     <div class="card mb-4 border-0 shadow-sm">
         <div class="card-header bg-primary text-white">
             <h2 class="card-title h5 mb-0">
@@ -56,37 +56,124 @@
 
     <hr class="my-4">
 
-    {# Tabla para Listar Usuarios #}
     <div class="card border-0 shadow-sm">
-        <div class="card-header bg-info text-white">
-            <h2 class="card-title h5 mb-0">
-                <i class="fas fa-list me-2"></i> Listado de Usuarios
-            </h2>
+    <div class="card-header bg-info text-white">
+        <h2 class="card-title h5 mb-0">
+            <i class="fas fa-list me-2"></i> Listado de Usuarios
+        </h2>
+    </div>
+    <div class="card-body">
+        {# SEARCH BAR MOVED HERE #}
+        <div class="d-flex justify-content-between mb-3"> {# Changed mt-3 to mb-3 for spacing below search #}
+            <input type="text" id="userSearchInput" class="form-control me-2" placeholder="Buscar usuarios por nombre o email...">
+            <button class="btn btn-outline-secondary" id="userSearchBtn">Buscar</button>
+            <button class="btn btn-outline-info ms-2" id="refreshUsersBtn"><i class="fas fa-sync-alt"></i> Actualizar</button>
         </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table id="users-table" class="table table-hover table-striped">
-                    <thead class="table-dark">
-                        <tr>
-                            <th scope="col">ID</th>
-                            <th scope="col">Nombre</th>
-                            <th scope="col">Email</th>
-                            <th scope="col">Rol</th>
-                            <th scope="col" class="text-center">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {# Los datos de los usuarios se insertarán aquí dinámicamente con JavaScript #}
-                    </tbody>
-                </table>
-            </div>
-            <div id="no-users-message" class="alert alert-info text-center d-none" role="alert">
-                No hay usuarios registrados.
+
+        <div class="table-responsive">
+            <table id="users-table" class="table table-hover table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Rol</th>
+                        <th scope="col" class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    {# Los datos de los usuarios se insertarán aquí dinámicamente con JavaScript #}
+                </tbody>
+            </table>
+        </div>
+        <div id="no-users-message" class="alert alert-info text-center d-none" role="alert">
+            No hay usuarios registrados.
+        </div>
+    </div>
+</div>
+
+    {# --- MODALS START HERE --- #}
+
+    {# Modal para Añadir Nuevo Usuario #}
+    <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="addUserModalLabel">
+                        <i class="fas fa-user-plus me-2"></i> Añadir Nuevo Usuario
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="addUserForm"> {# Added form tag here for clarity and submission #}
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="addUserName" class="form-label">Nombre:</label>
+                            <input type="text" id="addUserName" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addUserEmail" class="form-label">Email:</label>
+                            <input type="email" id="addUserEmail" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addUserPassword" class="form-label">Contraseña:</label>
+                            <input type="password" id="addUserPassword" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addUserRol" class="form-label">Rol:</label>
+                            <select id="addUserRol" class="form-select" required>
+                                <option value="usuario">Usuario</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Usuario</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
-    {# Modal para Cambiar Contraseña #}
+    {# Modal para Editar Usuario #}
+    <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title" id="editUserModalLabel">
+                        <i class="fas fa-edit me-2"></i> Editar Usuario
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editUserForm"> {# Added form tag here #}
+                    <div class="modal-body">
+                        <input type="hidden" id="editUserId">
+                        <div class="mb-3">
+                            <label for="editUserName" class="form-label">Nombre:</label>
+                            <input type="text" id="editUserName" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editUserEmail" class="form-label">Email:</label>
+                            <input type="email" id="editUserEmail" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editUserRol" class="form-label">Rol:</label>
+                            <select id="editUserRol" class="form-select" required>
+                                <option value="usuario">Usuario</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Actualizar Usuario</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {# Modal para Cambiar Contraseña (This one was already present in your HTML) #}
     <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -96,28 +183,58 @@
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
+                <form id="changePasswordForm"> {# Added form tag here #}
+                    <div class="modal-body">
+                        <p>Cambiando contraseña para: <strong id="changePasswordUserName"></strong> (ID: <span id="changePasswordUserId"></span>)</p>
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">Nueva Contraseña:</label>
+                            <input type="password" class="form-control" id="newPassword" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmNewPassword" class="form-label">Confirmar Nueva Contraseña:</label>
+                            <input type="password" class="form-control" id="confirmNewPassword" required>
+                        </div>
+                        <div id="password-modal-message-area" class="alert d-none" role="alert"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-unlock-alt me-1"></i> Guardar Contraseña
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+   
+    {# Modal para Eliminar Usuario #}
+    <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteUserModalLabel">
+                        <i class="fas fa-exclamation-triangle me-2"></i> Confirmar Eliminación
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
                 <div class="modal-body">
-                    <p>Cambiando contraseña para: <strong id="modal-user-name"></strong> (ID: <span id="modal-user-id"></span>)</p>
-                    <div class="mb-3">
-                        <label for="newPassword" class="form-label">Nueva Contraseña:</label>
-                        <input type="password" class="form-control" id="newPassword" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="confirmNewPassword" class="form-label">Confirmar Nueva Contraseña:</label>
-                        <input type="password" class="form-control" id="confirmNewPassword" required>
-                    </div>
-                    <div id="password-modal-message-area" class="alert d-none" role="alert"></div>
+                    <p>¿Estás seguro de que quieres eliminar al usuario:</p>
+                    <p><strong>Nombre:</strong> <span id="deleteUserNameConfirm"></span></p>
+                    <p><strong>Email:</strong> <span id="deleteUserEmailConfirm"></span></p>
+                    <input type="hidden" id="deleteUserIdConfirm">
+                    <div id="delete-modal-message-area" class="alert d-none" role="alert"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" id="saveNewPasswordBtn">
-                        <i class="fas fa-unlock-alt me-1"></i> Guardar Contraseña
+                    <button type="button" class="btn btn-danger" id="confirmDeleteUserBtn">
+                        <i class="fas fa-trash-alt me-1"></i> Eliminar
                     </button>
                 </div>
             </div>
         </div>
     </div>
-    
-    {# El script JavaScript se incluye aquí. Asegúrate de que la ruta sea correcta. #}
+
+
+    {# The JavaScript script is included here. Make sure the path is correct. #}
     <script src="/js/usuarios.js"></script>
 </div>

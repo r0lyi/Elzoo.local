@@ -86,48 +86,51 @@ switch ($resource) {
         $subResource = $segment3; // 'comentarios' or null
 
         // --- Handle /api/v1/foros and /api/v1/foros/{id} ---
-        // If NO sub-resource (segment3 is null) and the number of segments is 1 or 2
+        // This block covers:
+        // - GET /api/v1/foros (with optional query parameters for filtering)
+        // - POST /api/v1/foros
+        // - GET /api/v1/foros/{id}
+        // - PUT /api/v1/foros/{id}
+        // - DELETE /api/v1/foros/{id}
         if (!$subResource && count($apiSegments) <= 2) {
-             // Ensure that if there is an ID (segment2), it is numeric
-             if ($foroId && !is_numeric($foroId)) {
-                  // If there is a second segment but it's NOT numeric (e.g., /foros/abc), it's an invalid route
+             // Validate if segment2 is a numeric ID or if it's not present (for /foros)
+             if ($foroId !== null && !is_numeric($foroId)) {
+                  // If there is a second segment but it's NOT numeric (e.g., /foros/abc), it's an invalid route for ID
                   http_response_code(400); // Bad Request
                   echo json_encode(["message" => "ID de foro inválido en la ruta."]);
                   $routeHandled = true;
              } else {
-                // Controller must be included in public/index.php
                 $controller = new ForoController();
 
                 switch ($requestMethod) {
                     case 'GET':
                          if ($foroId) { // GET /api/v1/foros/{id}
-                             $controller->show($foroId); // $foroId already validated as numeric above
-                         } elseif (count($apiSegments) === 1) { // GET /api/v1/foros
-                              $controller->index();
-                         } // If $foroId is null and count>1 (e.g. /foros/extra), falls through to general 404
-                         $routeHandled = true; // If reached here, GET was handled or will fall through to 404
+                             $controller->show($foroId);
+                         } else { // GET /api/v1/foros (with potential query parameters)
+                              $controller->index(); // Este método ahora maneja los filtros
+                         }
+                         $routeHandled = true;
                          break;
                     case 'POST':
-                         if (!$foroId && count($apiSegments) === 1) { // Only POST to /api/v1/foros
+                         if (!$foroId) { // Only POST to /api/v1/foros
                               $controller->store();
                               $routeHandled = true;
-                         } // If there is an ID or more segments, falls through to 404 or 405
+                         } // If $foroId is present, it's a 405 or 404, handled by default case
                          break;
                     case 'PUT':
-                         if ($foroId && is_numeric($foroId)) { // Only PUT to /api/v1/foros/{id}
-                              $controller->update($foroId); // $foroId already validated as numeric
+                         if ($foroId) { // Only PUT to /api/v1/foros/{id}
+                              $controller->update($foroId);
                               $routeHandled = true;
-                         } // If no ID, falls through to 404 or 405
+                         }
                          break;
                     case 'DELETE':
-                         if ($foroId && is_numeric($foroId)) { // Only DELETE to /api/v1/foros/{id}
-                              $controller->destroy($foroId); // $foroId already validated as numeric
+                         if ($foroId) { // Only DELETE to /api/v1/foros/{id}
+                              $controller->destroy($foroId);
                               $routeHandled = true;
-                         } // If no ID, falls through to 404 o 405
+                         }
                          break;
                     default:
-                         // Method not allowed for /foros or /foros/{id}
-                         http_response_code(405);
+                         http_response_code(405); // Method Not Allowed
                          echo json_encode(["message" => "Método " . $requestMethod . " no permitido para este endpoint de foros."]);
                          $routeHandled = true;
                         break;
@@ -137,21 +140,17 @@ switch ($resource) {
         // --- Handle /api/v1/foros/{id}/comentarios ---
         // If sub-resource is 'comentarios', the foro ID (segment2) must be numeric, and the number of segments is exactly 3
         elseif ($subResource === 'comentarios' && $foroId && is_numeric($foroId) && count($apiSegments) === 3) {
-             // Controller must be included in public/index.php
              $controller = new ComentarioForoController();
 
              switch ($requestMethod) {
                  case 'GET':
-                      // GET /api/v1/foros/{foro_id}/comentarios
-                      $controller->indexByForo($foroId); // $foroId already validated as numeric
+                      $controller->indexByForo($foroId);
                       $routeHandled = true;
                       break;
                  case 'POST':
-                       // POST /api/v1/foros/{foro_id}/comentarios
-                       $controller->store($foroId); // Pass foroId to store ($foroId ya validado)
+                       $controller->store($foroId);
                        $routeHandled = true;
                        break;
-                 // No PUT/DELETE defined for this nested URL (use /api/v1/comentarios/{id} endpoints)
                  default:
                       http_response_code(405);
                       echo json_encode(["message" => "Método " . $requestMethod . " no permitido para foros/{id}/comentarios."]);
@@ -159,10 +158,9 @@ switch ($resource) {
                       break;
              }
         }
-        // If the path starts with /foros but doesn't match /foros, /foros/{id}, or /foros/{id}/comentarios,
-        // it is not handled here and falls through to the general 404.
+        // If the path starts with /foros but doesn't match a valid pattern
+        // it falls through to the general 404 handler below.
         break;
-
     case 'comentarios':
         $commentId = $segment2; // Comment ID
 

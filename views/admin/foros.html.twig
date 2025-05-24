@@ -1,12 +1,178 @@
-{# Gestión de foros #}
-<h2>Foros</h2>
-<div>
-  <h3>General</h3>
-  <button>Ver temas</button>
+{# templates/admin/foros.html.twig #}
+
+<div id="foros-component" class="container mt-4 mb-5 p-4 shadow-sm rounded-3 bg-white">
+    <h1 class="mb-4 text-center text-primary">
+        <i class="fas fa-comments me-2"></i> Gestión de Posts del Foro
+    </h1>
+
+    {# Área de Mensajes #}
+    <div id="message-area" class="alert d-none" role="alert"></div>
+
+    <hr class="my-4">
+
+    {# Formulario para Crear/Editar Post del Foro (solo edición para admin) #}
+    <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h2 class="card-title h5 mb-0">
+                <i class="fas fa-edit me-2"></i>
+                <span id="form-title-text">Editar Post Existente</span>
+            </h2>
+        </div>
+        <div class="card-body">
+            <form id="foro-form">
+                <input type="hidden" id="foro-id">
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label for="titulo" class="form-label">Título:</label>
+                        <input type="text" id="titulo" class="form-control" placeholder="Título del post" required>
+                    </div>
+                    <div class="col-md-4 d-none" id="autor-id-container">
+                        <label for="autor_id" class="form-label">ID Autor:</label>
+                        <input type="number" id="autor_id" class="form-control" placeholder="ID del autor" min="1" readonly>
+                    </div>
+                    <div class="col-12">
+                        <label for="contenido" class="form-label">Contenido:</label>
+                        <textarea id="contenido" class="form-control" rows="5" placeholder="Contenido del post..." required></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="fecha_creacion" class="form-label">Fecha de Creación:</label>
+                        <input type="text" id="fecha_creacion" class="form-control" readonly placeholder="Se asigna automáticamente al crear">
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end mt-4">
+                    <button type="submit" class="btn btn-warning me-2" id="save-foro-btn">
+                        <i class="fas fa-sync-alt me-1"></i> Actualizar Post
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="cancel-edit-btn">
+                        <i class="fas fa-times-circle me-1"></i> Cancelar Edición
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <hr class="my-4">
+
+    {# Sección de Búsqueda de Posts del Foro #}
+    <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-header bg-info text-white">
+            <h2 class="card-title h5 mb-0">
+                <i class="fas fa-search me-2"></i> Buscar Posts
+            </h2>
+        </div>
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-12">
+                    <label for="search-input" class="form-label visually-hidden">Buscar</label>
+                    <input type="text" id="search-input" class="form-control form-control-lg" placeholder="Buscar por título o autor...">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-4">
+
+    {# Tabla para Listar Posts del Foro #}
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-secondary text-white">
+            <h2 class="card-title h5 mb-0">
+                <i class="fas fa-list-alt me-2"></i> Listado de Posts
+            </h2>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="foros-table" class="table table-hover table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Título</th>
+                            <th scope="col">Autor</th>
+                            <th scope="col">Fecha Creación</th>
+                            <th scope="col" class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {# Los datos de los posts se insertarán aquí dinámicamente con JavaScript #}
+                    </tbody>
+                </table>
+            </div>
+            <div id="no-foros-message" class="alert alert-info text-center d-none" role="alert">
+                No hay posts de foro registrados que coincidan con los criterios.
+            </div>
+        </div>
+    </div>
+
+    {# Modal para Ver Detalles del Post y Gestionar Comentarios #}
+    <div class="modal fade" id="foroDetailsModal" tabindex="-1" aria-labelledby="foroDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="foroDetailsModalLabel">
+                        <i class="fas fa-info-circle me-2"></i> Detalles del Post y Comentarios
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h4 class="text-center text-primary" id="modal-foro-titulo"></h4>
+                    <p class="text-center text-muted">Autor: <span id="modal-foro-autor-nombre"></span> (ID: <span id="modal-foro-autor-id"></span>)</p>
+                    <p class="text-center text-muted">Fecha de Creación: <span id="modal-foro-fecha-creacion"></span></p>
+                    <hr>
+                    <p><strong>ID del Post:</strong> <span id="modal-foro-id"></span></p>
+                    <h6 class="mt-3">Contenido:</h6>
+                    <p id="modal-foro-contenido" class="text-justify"></p>
+
+                    <hr class="my-4">
+
+                    {# Sección de Gestión de Comentarios #}
+                    <h5 class="mb-3 text-secondary"><i class="fas fa-comments me-2"></i> Comentarios</h5>
+
+                    {# Formulario para Añadir/Editar Comentario: SOLO EDICIÓN #}
+                    <div class="card mb-3 border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h6 class="card-title h6 mb-0">
+                                <span id="comment-form-title-text">Editar Comentario</span>
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <form id="comment-form">
+                                <input type="hidden" id="comment-id">
+                                <input type="hidden" id="comment-foro-id">
+                                <div class="mb-3">
+                                    <label for="comment-autor-id" class="form-label">ID Autor del Comentario:</label>
+                                    <input type="number" id="comment-autor-id" class="form-control" placeholder="ID del autor" required min="1" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="comment-contenido" class="form-label">Contenido del Comentario:</label>
+                                    <textarea id="comment-contenido" class="form-control" rows="3" placeholder="Edita el comentario aquí..." required></textarea>
+                                </div>
+                                <div class="d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-warning btn-sm me-2" id="save-comment-btn">
+                                        <i class="fas fa-sync-alt me-1"></i> Actualizar Comentario
+                                    </button>
+                                    <button type="button" class="btn btn-secondary btn-sm" id="cancel-comment-edit-btn">
+                                        <i class="fas fa-times-circle me-1"></i> Cancelar Edición
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    {# Lista de Comentarios #}
+                    <div class="comment-list mt-4">
+                        <ul class="list-group" id="comments-list-group">
+                            {# Los comentarios se cargarán aquí dinámicamente #}
+                        </ul>
+                        <div id="no-comments-message" class="alert alert-info text-center mt-3 d-none" role="alert">
+                            Este post no tiene comentarios aún.
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/foros.js"></script>
 </div>
-<div>
-  <h3>Adopciones</h3>
-  <button>Ver temas</button>
-</div>
-<!-- ... -->
-<button>Crear nuevo foro</button>
