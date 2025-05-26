@@ -3,72 +3,232 @@
 {% block title %}Lista de Animales - Zoológico{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <header class="text-center mb-5 animate__animated animate__fadeInDown">
-        <h1 class="display-4 fw-bold">Lista de Animales</h1>
-        <p class="lead">Conoce a todos los animales que viven en nuestro zoológico.</p>
+<div class="container my-5"> {# Usamos my-5 para un margen vertical más consistente #}
+    {# Hero Section for Animals #}
+    <header class="text-center mb-5 py-4 bg-info bg-gradient text-white rounded-3 shadow-lg animate__animated animate__fadeInDown">
+        <h1 class="display-4 fw-bold mb-3">
+            <i class="fas fa-paw me-2"></i>Conoce a Nuestros Animales
+        </h1>
+        <p class="lead">Descubre la diversidad de especies que habitan nuestro zoológico. ¡Cada uno con su propia historia!</p>
+        <hr class="w-25 mx-auto border-white">
     </header>
 
     <section class="animals-list">
-        {% if animales|length > 0 %}
-            <div class="row justify-content-center">
+        <h2 class="text-center mb-5 text-info animate__animated animate__zoomIn">
+            <i class="fas fa-list me-2"></i>Nuestros Habitantes
+        </h2>
+
+        {% if animales is not empty %}
+            {# Usamos g-4 para gutters y row-cols para la responsividad #}
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
                 {% for animal in animales %}
-                    <div class="col-12 col-sm-6 col-md-4 mb-4 animate__animated animate__fadeInUp">
-                        <div class="card h-100 shadow-sm">
-                            <img src="{{ animal.imagen }}" class="card-img-top" alt="Imagen de {{ animal.nombre }}" style="height: 250px; object-fit: cover;">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">{{ animal.nombre }}</h5>
-                                <p class="card-text">
-                                    <strong>Clase:</strong> {{ animal.clase }}
-                                </p>
-                                {# Convertir nombre a slug para la URL (opcional: puedes usar un filtro personalizado si lo implementas) #}
-                                {% set nombre_slug = animal.nombre|lower|replace({' ': '-'}) %}
-                                <a href="/animales/{{ nombre_slug }}" class="btn btn-primary">Ver detalles</a>
+                    <div class="col animate__animated animate__fadeInUp" style="animation-delay: {{ loop.index * 0.15 }}s">
+                        <div class="card h-100 shadow-sm border-0 transform-on-hover">
+                            {# Aseguramos que la imagen siempre tenga una URL, incluso si es un placeholder #}
+                            <img src="{{ animal.imagen ?: 'https://via.placeholder.com/600x400?text=Imagen+Animal+No+Disponible' }}" class="card-img-top animal-card-img" alt="Imagen de {{ animal.nombre }}">
+                            <div class="card-body d-flex flex-column justify-content-between text-center">
+                                <div>
+                                    <h5 class="card-title text-dark fw-bold mb-2">{{ animal.nombre }}</h5>
+                                    <p class="card-text text-muted mb-1">
+                                        <i class="fas fa-tag me-1"></i> <strong>Clase:</strong> {{ animal.clase }}
+                                    </p>
+                                    {# Agregamos más detalles si los tienes (ej. especie, hábitat) #}
+                                    {% if animal.especie is defined and animal.especie is not empty %}
+                                        <p class="card-text text-muted mb-1">
+                                            <i class="fas fa-dna me-1"></i> <strong>Especie:</strong> {{ animal.especie }}
+                                        </p>
+                                    {% endif %}
+                                    {% if animal.habitat is defined and animal.habitat is not empty %}
+                                        <p class="card-text text-muted mb-1">
+                                            <i class="fas fa-tree me-1"></i> <strong>Hábitat:</strong> {{ animal.habitat }}
+                                        </p>
+                                    {% endif %}
+                                </div>
+                                <div class="mt-3">
+                                    {# Preparamos el slug para la URL de detalles #}
+                                    {% set nombre_slug = animal.nombre|lower|replace({' ': '-','_':'-','á':'a','é':'e','í':'i','ó':'o','ú':'u','ñ':'n','ü':'u','à':'a','è':'e','ì':'i','ò':'o','ù':'u'}) %}
+                                    <a href="/animales/{{ nombre_slug }}" class="btn btn-primary animal-detail-btn shadow-sm">
+                                        Ver detalles <i class="fas fa-info-circle ms-2"></i>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
                 {% endfor %}
             </div>
+
+            {# Pagination Controls (as in home.html.twig) #}
+            <nav aria-label="Navegación de animales" class="mt-5 d-flex justify-content-center animate__animated animate__fadeInUp">
+                <ul class="pagination">
+                    {# Previous Button #}
+                    <li class="page-item {% if currentPage == 1 %}disabled{% endif %}">
+                        <a class="page-link" href="?page={{ currentPage - 1 }}" aria-label="Anterior">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+
+                    {# Page Numbers #}
+                    {% for i in 1..totalPages %}
+                    <li class="page-item {% if currentPage == i %}active{% endif %}">
+                        <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                    </li>
+                    {% endfor %}
+
+                    {# Next Button #}
+                    <li class="page-item {% if currentPage == totalPages %}disabled{% endif %}">
+                        <a class="page-link" href="?page={{ currentPage + 1 }}" aria-label="Siguiente">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
         {% else %}
-            <p class="text-center animate__animated animate__fadeInUp">No hay animales disponibles en este momento.</p>
+            <div class="alert alert-info text-center animate__animated animate__fadeInUp" role="alert">
+                <i class="fas fa-info-circle me-2"></i> No hay animales disponibles en este momento. ¡Vuelve pronto!
+            </div>
         {% endif %}
     </section>
 </div>
 
+---
+
 <style>
+    body {
+        background-color: #f8f9fa; /* Consistent light grey background */
+        font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
     .container {
         max-width: 1200px;
     }
+
+    /* Header styling for animals view */
+    header {
+        background: linear-gradient(to right, #2196F3, #64B5F6); /* Blue gradient for animals */
+        color: white;
+    }
+
+    header h1 {
+        font-size: 2.8rem;
+    }
+
+    header p.lead {
+        font-size: 1.25rem;
+        color: #e0e0e0;
+    }
+
+    /* Card styling */
     .card {
-        border-radius: 15px;
+        border-radius: 12px;
         overflow: hidden;
-        transition: transform 0.3s, box-shadow 0.3s;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease-in-out;
     }
-    .card:hover {
-        transform: scale(1.05);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+
+    .transform-on-hover:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
     }
-    .card-img-top {
+
+    .animal-card-img {
         height: 250px;
         object-fit: cover;
-        transition: transform 0.3s;
+        width: 100%;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+        transition: transform 0.3s ease-in-out;
     }
-    .card:hover .card-img-top {
-        transform: scale(1.1);
+
+    .transform-on-hover:hover .animal-card-img {
+        transform: scale(1.05); /* Slight zoom on image hover */
     }
-    .btn-primary {
-        background-color: #2c5f2d;
+
+    .card-title {
+        color: #0d47a1; /* Dark blue for titles */
+        font-weight: 700;
+        font-size: 1.5rem; /* Larger title for animals */
+    }
+
+    .card-text strong {
+        color: #333;
+    }
+
+    .animal-detail-btn {
+        background-color: #2196F3; /* Matching header blue */
         border: none;
+        padding: 10px 20px;
+        font-size: 1rem;
+        border-radius: 8px;
+        transition: background-color 0.2s ease-in-out;
     }
-    .btn-primary:hover {
-        background-color: #1e4d1e;
+
+    .animal-detail-btn:hover {
+        background-color: #1976D2; /* Darker blue on hover */
     }
-    @media (max-width: 576px) {
+
+    /* Pagination styling (consistent with news) */
+    .pagination .page-item .page-link {
+        color: #2196F3; /* Use blue for pagination links */
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+        margin: 0 2px;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #2196F3;
+        border-color: #2196F3;
+        color: white;
+    }
+
+    .pagination .page-item.disabled .page-link {
+        color: #6c757d;
+    }
+
+    /* Animations (ensure Animate.css is linked in base.html.twig) */
+    .animate__animated {
+        animation-duration: 0.8s;
+        animation-fill-mode: both;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        header h1 {
+            font-size: 2.2rem;
+        }
+        header p.lead {
+            font-size: 1rem;
+        }
+        .animal-card-img {
+            height: 200px;
+        }
         .card-title {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        header {
+            padding: 2rem 1rem;
+        }
+        header h1 {
+            font-size: 1.8rem;
+        }
+        header p.lead {
+            font-size: 0.9rem;
+        }
+        .animal-card-img {
+            height: 180px;
+        }
+        .card-title {
+            font-size: 1.1rem;
         }
         .card-text {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+        }
+        .pagination {
+            flex-wrap: wrap;
+            justify-content: center;
         }
     }
 </style>

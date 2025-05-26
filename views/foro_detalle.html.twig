@@ -17,24 +17,34 @@
     </div>
   </article>
 
-  <section class="comentarios mb-5">
-    <h3 class="mb-4">Comentarios</h3>
-    {% if comentarios is defined and comentarios|length > 0 %}
-      {% for c in comentarios %}
-        <div class="card mb-3">
-          <div class="card-body">
-            <p>{{ c.contenido|nl2br }}</p>
-            <p class="text-muted small">
-              Comentado por <strong>{{ c.autor_nombre }}</strong>
-              el {{ c.fecha_creacion|date('d/m/Y H:i') }}
-            </p>
-          </div>
-        </div>
-      {% endfor %}
-    {% else %}
-      <p>No hay comentarios aún. Sé el primero en comentar.</p>
-    {% endif %}
-  </section>
+  <section class="add-comment mb-5 card shadow-sm border-0 animate__animated animate__fadeIn">
+    {# ... (card header) ... #}
+    <div class="card-body p-4">
+        {% if is_authenticated %}
+            {# Form action correctly points to the current forum's detail URL #}
+            <form action="/foros/{{ foro.id }}" method="POST">
+                <div class="mb-3">
+                    <label for="contenidoComentario" class="form-label fw-bold">Tu Comentario</label>
+                    <textarea
+                        id="contenidoComentario"
+                        name="contenido" {# This name is crucial for $_POST['contenido'] #}
+                        class="form-control"
+                        rows="4"
+                        placeholder="Escribe tu comentario aquí..."
+                        required
+                    ></textarea>
+                </div>
+                <button type="submit" class="btn btn-success btn-lg w-100">
+                    <i class="fas fa-paper-plane me-2"></i> Publicar Comentario
+                </button>
+            </form>
+        {% else %}
+            <div class="alert alert-info text-center" role="alert">
+                Para comentar, por favor <a href="/login" class="alert-link fw-bold">inicia sesión</a>.
+            </div>
+        {% endif %}
+    </div>
+</section>
 
   {% if is_authenticated %}
     <section class="crear-comentario mb-5">

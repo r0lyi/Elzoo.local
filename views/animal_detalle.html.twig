@@ -3,29 +3,75 @@
 {% block title %}Detalle de {{ animal.nombre }}{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center animate__animated animate__fadeInDown">
-        <div class="col-md-8">
-            <div class="card shadow-sm">
-                <img src="{{ animal.imagen }}" class="card-img-top" alt="Imagen de {{ animal.nombre }}">
-                <div class="card-body">
-                    <h2 class="card-title">{{ animal.nombre }}</h2>
-                    <p><strong>Clase:</strong> {{ animal.clase }}</p>
-                    <p><strong>Nombre científico:</strong> {{ animal.nombre_cientifico }}</p>
-                    <p><strong>Continente:</strong> {{ animal.continente }}</p>
-                    <p><strong>Hábitat:</strong> {{ animal.habitat }}</p>
-                    <p><strong>Dieta:</strong> {{ animal.dieta }}</p>
-                    <p><strong>Peso:</strong> {{ animal.peso }}</p>
-                    <p><strong>Tamaño:</strong> {{ animal.tamano }}</p>
-                    <p><strong>Información:</strong></p>
-                    <p>{{ animal.informacion }}</p>
-                    <p><strong>¿Sabías que?</strong></p>
-                    <p>{{ animal.sabias }}</p>
-                    <p><strong>Fecha de nacimiento:</strong> {{ animal.fecha_nacimiento|date('d/m/Y') }}</p>
-                    <a href="/animales" class="btn btn-secondary mt-3">Volver a lista</a>
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10 animate__animated animate__fadeInUp">
+      <div class="card border-0 shadow-lg overflow-hidden">
+        <div class="row g-0">
+          {# Imagen lateral #}
+          <div class="col-md-5">
+            <img src="{{ animal.imagen }}" class="img-fluid h-100 object-fit-cover" alt="Imagen de {{ animal.nombre }}">
+          </div>
+          <div class="col-md-7">
+            <div class="card-body p-4">
+              <h1 class="card-title display-5 fw-bold mb-3">{{ animal.nombre }}</h1>
+              <div class="mb-4">
+                <span class="badge bg-success me-2">{{ animal.clase }}</span>
+                <small class="text-muted fst-italic">{{ animal.nombre_cientifico }}</small>
+              </div>
+
+              <div class="row mb-4">
+                <div class="col-sm-6 mb-2">
+                  <i class="fas fa-map-marker-alt me-2 text-success"></i>
+                  <strong>Continente:</strong> {{ animal.continente }}
                 </div>
+                <div class="col-sm-6 mb-2">
+                  <i class="fas fa-water me-2 text-primary"></i>
+                  <strong>Hábitat:</strong> {{ animal.habitat }}
+                </div>
+                <div class="col-sm-6 mb-2">
+                  <i class="fas fa-apple-alt me-2 text-warning"></i>
+                  <strong>Dieta:</strong> {{ animal.dieta }}
+                </div>
+                <div class="col-sm-6 mb-2">
+                  <i class="fas fa-weight-hanging me-2 text-secondary"></i>
+                  <strong>Peso:</strong> {{ animal.peso }}
+                </div>
+                <div class="col-sm-6 mb-2">
+                  <i class="fas fa-ruler-vertical me-2 text-info"></i>
+                  <strong>Tamaño:</strong> {{ animal.tamano }}
+                </div>
+                <div class="col-sm-6 mb-2">
+                  <i class="fas fa-birthday-cake me-2 text-danger"></i>
+                  <strong>Registrado el:</strong> {{ animal.fecha_registro|date('d/m/Y') }}
+                </div>
+              </div>
+
+              <hr>
+
+              <h5 class="fw-semibold mb-2"><i class="fas fa-info-circle me-2 text-success"></i>Información</h5>
+              <p class="card-text text-justify">{{ animal.informacion }}</p>
+
+              <div class="bg-light p-3 rounded-3 mt-4">
+                <h5 class="fw-semibold mb-2"><i class="fas fa-lightbulb me-2 text-warning"></i>¿Sabías que?</h5>
+                <p class="mb-0">{{ animal.sabias }}</p>
+              </div>
+
+              <a href="/animales" class="btn btn-outline-secondary mt-4">
+                <i class="fas fa-arrow-left me-1"></i> Volver a lista
+              </a>
             </div>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 </div>
+
+{# Estilos adicionales para object-fit en Bootstrap 4 o 5 #}
+<style>
+  .object-fit-cover {
+    object-fit: cover;
+  }
+</style>
 {% endblock %}

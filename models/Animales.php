@@ -59,22 +59,41 @@ class Animales {
 
     // Mantener método 'getAnimales' existente (retorna OBJETOS Animales)
     // Método para obtener todos los animales (Retorna OBJETOS Animales)
-    public static function getAnimales() {
+     public static function getAnimales($limit = 12, $offset = 0) { // Default to 7 animals per page
         $db = ControllerDatabase::connect();
-
         if ($db === null) {
             return [];
         }
 
-        $stmt = $db->query("SELECT * FROM animales");
+        // Use LIMIT and OFFSET in the SQL query for pagination
+        // Ensure your SELECT * picks up all columns needed for the Animales constructor
+        $stmt = $db->prepare("SELECT * FROM animales ORDER BY nombre ASC LIMIT :limit OFFSET :offset");
+        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
         $animalesData = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         $animales = [];
         foreach ($animalesData as $animalData) {
-            $animales[] = new Animales($animalData);
+            $animales[] = new Animales($animalData); // Pass the associative array to the constructor
         }
 
         return $animales;
+    }
+
+    /**
+     * Gets the total count of all animals.
+     *
+     * @return int The total number of animals.
+     */
+    public static function getTotalAnimalesCount() {
+        $db = ControllerDatabase::connect();
+        if ($db === null) {
+            return 0;
+        }
+
+        $stmt = $db->query("SELECT COUNT(*) FROM animales");
+        return (int) $stmt->fetchColumn(); // Cast to int
     }
 
     // Mantener método 'getPorNombre' existente (encuentra por slug, retorna OBJETO Animales)
