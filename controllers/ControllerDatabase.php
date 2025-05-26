@@ -5,7 +5,7 @@ class ControllerDatabase {
 
     private static $host = "localhost"; // Cambia según tu configuración
     private static $username = "usuario"; // Cambia según tu configuración
-    private static $password = "CASA%rsg2005"; // Cambia según tu configuración
+    private static $password = "CASA%rgs2006"; // Cambia según tu configuración
     private static $dbname = "Elzoo"; // Cambia según el nombre de tu base de datos
     private static $options = array(
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
