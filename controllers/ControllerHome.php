@@ -1,12 +1,5 @@
 <?php
-// controllers/ControllerHome.php
 
-// Orden de inclusión de archivos:
-// 1. ControllerCookie.php (para getAuthCookie y deleteAuthCookie)
-// 2. ControllerJWT.php (para verificarJWT y decodificarJWT)
-// 3. Usuarios.php (para Usuarios::esAdmin)
-// 4. ControllerTwig.php (para renderView)
-// 5. Noticias.php
 require_once __DIR__ . '/../controllers/ControllerCookie.php';
 require_once __DIR__ . '/../controllers/ControllerJWT.php';
 require_once __DIR__ . '/../models/Usuarios.php';
@@ -50,11 +43,9 @@ function home() {
         session_destroy();
     }
 
-    // --- Pagination Logic ---
-    $itemsPerPage = 12; // Define how many news items per page
+    $itemsPerPage = 12; 
 
-    // Get the current page from the URL query parameter 'page'
-    // Ensure it's an integer and at least 1
+ 
     $currentPage = isset($_GET['page']) ? (int)$_GET['page'] : 1;
     if ($currentPage < 1) {
         $currentPage = 1;

@@ -4,9 +4,7 @@
 require_once __DIR__ . '/ControllerTwig.php';
 require_once __DIR__ . '/../models/Animales.php';
 
-/**
- * Captura el slug desde la URL y carga la vista de detalle.
- */
+
 function mostrarAnimal(): void
 {
     // Ejemplo de URL: /animales/leon-marino
@@ -24,7 +22,6 @@ function mostrarAnimal(): void
         exit;
     }
 
-    // Renderiza vista profesional de detalle
     renderView('animal_detalle.html.twig', [
         'animal' => $animal
     ]);

@@ -1,10 +1,8 @@
 <?php
-// controllers/http/ForoController.php
 
 require_once __DIR__ . '/../../models/Foro.php';
 require_once __DIR__ . '/../../models/Usuarios.php';
-// ATENCIÓN: Revisa este require_once. Si tu archivo se llama 'ComentarioForo.php' (singular),
-// entonces deberás cambiarlo a '/ComentarioForo.php'.
+
 require_once __DIR__ . '/../../models/ComentarioForo.php';
 require_once __DIR__ . '/../ControllerDatabase.php';
 

@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Inicio - Mi Sitio Web{% endblock %}
+
+{% block content %}
+    <h1 class="text-center">Bienvenido a nuestro zoológico</h1>
+    <p class="text-center">Explora nuestras secciones para obtener más información.</p>
+
+    <h2 class="text-center my-4">Últimas Noticias</h2>
+
+    <div class="noticia-container">
+
+        {% if noticias is empty %}
+            <p class="text-center">No hay noticias disponibles por ahora.</p>
+        {% else %}
+            {% for noticia in noticias %}
+                <div class="noticia mb-4">
+                    <h3>{{ noticia.titulo }}</h3>
+                    <p class="text-muted">
+                        Publicado el {{ noticia.fecha_publicacion|date('d/m/Y H:i') }}
+                        {% if noticia.autor_id %} por el autor #{{ noticia.autor_id }}{% endif %}
+                    </p>
+                    <p>{{ noticia.descripcion }}</p>
+
+                    {% if noticia.imagen %}
+                        <div class="text-center">
+                            <img src="{{ noticia.imagen }}" alt="Imagen de {{ noticia.titulo }}" style="max-width: 100%; height: auto;">
+                        </div>
+                    {% else %}
+                        <p><em>No hay imagen disponible.</em></p>
+                    {% endif %}
+
+                    <p>
+                        <a href="{{ noticia.url_origen }}" target="_blank" rel="noopener noreferrer">
+                            Leer noticia original
+                        </a>
+                    </p>
+                </div>
+                <hr>
+            {% endfor %}
+        {% endif %}
+
+    </div>
+{% endblock %}

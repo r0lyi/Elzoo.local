@@ -7,10 +7,7 @@ require_once __DIR__ . '/../models/Usuarios.php';
 require_once __DIR__ . '/ControllerJWT.php';
 require_once __DIR__ . '/ControllerCookie.php';
 
-/**
- * Carga todas las publicaciones de foro y las envía a la vista foro.html.twig
- * También maneja la creación de nuevas publicaciones si la solicitud es POST.
- */
+
 function listarForos(): void
 {
     global $secret_key; // Asegúrate de que $secret_key esté definida en un archivo de configuración incluido.
@@ -19,7 +16,6 @@ function listarForos(): void
     $currentUserId = null;
     $message = null; // Para mensajes de éxito/error
 
-    // 1. Verificar autenticación a través del JWT en la cookie
     $jwt = getAuthCookie();
     if ($jwt && verificarJWT($jwt, $secret_key)) {
         $isAuthenticated = true;
@@ -38,7 +34,6 @@ function listarForos(): void
         deleteAuthCookie();
     }
 
-    // 2. Manejar la solicitud POST para crear un nuevo foro
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($isAuthenticated && $currentUserId) { // Ambas condiciones deben ser verdaderas
             $titulo = trim($_POST['titulo'] ?? '');
@@ -72,10 +67,8 @@ function listarForos(): void
     }
 
 
-    // 3. Obtener todas las publicaciones para mostrarlas
     $foros = Foro::obtenerTodos();
 
-    // 4. Enriquecer con nombre de autor
     $forosData = [];
     foreach ($foros as $foro) {
         $autor = Usuarios::obtenerPorId($foro->getAutorId());
@@ -89,7 +82,6 @@ function listarForos(): void
         ];
     }
 
-    // 5. Renderizar la vista de foros
     renderView('foro.html.twig', [
         'foros'             => $forosData,
         'is_authenticated'  => $isAuthenticated,

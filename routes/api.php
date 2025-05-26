@@ -13,25 +13,20 @@ if (str_starts_with($requestUriFromApiScope, '/api/v1/')) {
     exit();
 }
 
-// Divide $apiUri into segments
+// Divide $apiUri en segmentos
 $apiSegments = explode('/', $apiUri);
 
-// Analyze segments to identify the main resource and sub-resources/IDs
-$resource = $apiSegments[0] ?? null; // 'usuarios', 'foros', 'comentarios', 'animales', 'noticias', etc.
-$segment2 = $apiSegments[1] ?? null; // Could be an ID (user, comment, foro, animal, noticia) or a sub-resource (e.g., 'comentarios')
-$segment3 = $apiSegments[2] ?? null; // Could be a sub-resource or an ID in nested routes
+$resource = $apiSegments[0] ?? null; 
+$segment2 = $apiSegments[1] ?? null; 
+$segment3 = $apiSegments[2] ?? null; 
 
 
-// API routing based on the main resource and HTTP method
 switch ($resource) {
     case 'usuarios':
         $userId = $segment2; // User ID
-        // Ensure the path is exactly /usuarios or /usuarios/{id} or /usuarios/{id}/password
         
-        // Cargar el controlador de usuarios
         $controller = new UsuariosController();
 
-        // Manejar la ruta específica para cambiar contraseña
         if ($userId && $segment3 === 'password') {
             if ($requestMethod === 'PUT') {
                 $controller->changePassword($userId);
@@ -281,16 +276,13 @@ switch ($resource) {
          $noticiaId = $segment2; // ID de Noticia (puede ser null para /noticias)
 
          // Manejar /api/v1/noticias y /api/v1/noticias/{id}
-         // Asegurarse de que la ruta es exactamente /noticias o /noticias/{id} (no más segmentos)
+      
          if (count($apiSegments) <= 2) { // La ruta es /noticias o /noticias/{id}
-              // Asegurarse de que si hay un ID (segment2), sea numérico
               if ($noticiaId && !is_numeric($noticiaId)) {
-                   // Si hay un segundo segmento pero NO es numérico (ej: /noticias/abc), es una ruta inválida
                    http_response_code(400); // Bad Request
                    echo json_encode(["message" => "ID de noticia inválido en la ruta."]);
                    $routeHandled = true;
               } else {
-                // ¡El controlador NoticiasController DEBE HABER SIDO INCLUIDO EN public/index.php!
                  $controller = new NoticiasController();
 
                  switch ($requestMethod) {
@@ -299,8 +291,8 @@ switch ($resource) {
                                $controller->show($noticiaId); // $noticiaId ya validado como numérico arriba
                            } elseif (count($apiSegments) === 1) { // GET /api/v1/noticias
                                 $controller->index();
-                           } // Si $noticiaId es null y count>1 (ej: /noticias/extra), cae al 404 general
-                           $routeHandled = true; // Si llegó aquí, GET fue manejado o caerá al 404
+                           } 
+                           $routeHandled = true;
                            break;
                       case 'POST':
                            if (!$noticiaId && count($apiSegments) === 1) { // Solo POST a /api/v1/noticias
@@ -331,15 +323,12 @@ switch ($resource) {
                    }
                }
           }
-          // Si la ruta empieza con /noticias pero no coincide con /noticias o /noticias/{id}, cae al 404 general.
           break;
 
     default:
-        // El recurso principal no coincide, o la estructura general de la URL es inválida.
-        // No se maneja aquí ($routeHandled sigue siendo false) y caerá al 404 en public/index.php.
+
         break;
 }
 
-// ... (código restante de api.php para manejo del 404 general) ...
 
 ?>

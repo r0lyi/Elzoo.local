@@ -2,9 +2,7 @@
 // models/Foro.php
 
 require_once __DIR__ . '/../controllers/ControllerDatabase.php';
-// ATENCIÓN: Revisa este require_once. Si tu archivo se llama 'ComentarioForo.php' (singular),
-// entonces deberás cambiarlo a '/ComentarioForo.php'. Lo he puesto como singular aquí,
-// ya que es un error común.
+
 require_once __DIR__ . '/ComentarioForo.php';
 require_once __DIR__ . '/Usuarios.php'; // Asegúrate de que este también esté correcto
 
@@ -138,11 +136,6 @@ class Foro {
         return $post ?: null;
     }
 
-    /**
-     * Filtra posts del foro con los datos del autor por título y/o nombre de autor.
-     * @param array $criteria Un array asociativo con 'titulo' y/o 'autor_nombre'.
-     * @return array Una lista de posts del foro con los datos del autor.
-     */
     public static function filterWithAuthor(array $criteria = []): array {
         $db = ControllerDatabase::connect();
         $sql = "SELECT f.*, u.nombre as autor_nombre, u.rol as autor_rol
@@ -162,12 +155,7 @@ class Foro {
             $whereClauses[] = "u.nombre LIKE ?"; // Asegúrate de que la columna de nombre de usuario es 'nombre'
             $params[] = '%' . $criteria['autor_nombre'] . '%';
         }
-        // También puedes dejar el filtro por autor_id si lo necesitas en el futuro,
-        // aunque el requerimiento actual es por nombre de usuario.
-        // if (isset($criteria['autor_id']) && $criteria['autor_id'] !== '') {
-        //     $whereClauses[] = "f.autor_id = ?";
-        //     $params[] = (int)$criteria['autor_id'];
-        // }
+       
 
 
         if (!empty($whereClauses)) {

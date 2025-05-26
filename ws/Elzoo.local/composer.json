@@ -1,0 +1,13 @@
+{
+    "autoload": {
+        "psr-4": {
+            "DominiLocal\\": "controllers/"
+        }
+    },
+    "require": {
+        "firebase/php-jwt": "^6.10",
+        "twig/twig": "^3.0",
+        "twbs/bootstrap": "^5.3"
+    }
+
+}

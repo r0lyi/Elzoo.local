@@ -1,21 +1,12 @@
 <?php
-// controllers/http/ComentarioForoController.php
 
-// Rutas relativas desde controllers/http/
-// Sube dos niveles (..) a la raíz, luego baja a models/
 require_once __DIR__ . '/../../models/ComentarioForo.php';
-require_once __DIR__ . '/../../models/Usuarios.php'; // Necesario para validar autor_id existe, etc.
-// Sube un nivel (.) a controllers/ para el controlador de base de datos
-require_once __DIR__ . '/../ControllerDatabase.php'; // No usado directamente si los métodos del modelo lo usan, pero buena práctica incluir
+require_once __DIR__ . '/../../models/Usuarios.php'; 
+require_once __DIR__ . '/../ControllerDatabase.php';
 
 class ComentarioForoController {
 
-    // --- Métodos de ayuda (copiados de UsuariosController o un controlador base) ---
-
-     /**
-     * Obtiene el cuerpo de la solicitud JSON.
-     * @return object|null Objeto PHP si es JSON válido, null en caso contrario.
-     */
+   
     private function getJsonRequestBody() {
         $input = file_get_contents('php://input');
         $data = json_decode($input);
@@ -27,27 +18,18 @@ class ComentarioForoController {
         return $data;
     }
 
-    /**
-     * Envía una respuesta JSON.
-     * @param mixed $data Datos a codificar en JSON.
-     * @param int $statusCode Código de estado HTTP.
-     */
+  
     private function sendJsonResponse($data, $statusCode = 200) {
         http_response_code($statusCode);
         echo json_encode($data);
     }
 
-     /**
-     * Envía una respuesta de error JSON.
-     * @param string $message Mensaje de error.
-     * @param int $statusCode Código de estado HTTP.
-     */
+  
     private function sendErrorResponse($message, $statusCode = 500) {
         http_response_code($statusCode);
         echo json_encode(["message" => $message]);
     }
 
-    // --- Métodos del Controlador API para Comentarios ---
 
     // GET /api/v1/comentarios/{id}
     public function show($id) {
@@ -57,7 +39,6 @@ class ComentarioForoController {
             return;
         }
 
-        // Usar el método del modelo para encontrar el comentario, incluyendo datos del autor
         $comment = ComentarioForo::findWithAuthor($id); // O ComentarioForo::find($id) si no necesitas datos del autor
 
         if ($comment) {
@@ -78,7 +59,6 @@ class ComentarioForoController {
         // Usar el método del modelo para obtener comentarios de este foro, incluyendo datos del autor
         $comments = ComentarioForo::findByForoIdWithAuthor($foroId); // O ComentarioForo::findByForoId($foroId)
 
-        // Siempre retornar un array, incluso si está vacío
         $this->sendJsonResponse($comments);
      }
 
@@ -119,7 +99,6 @@ class ComentarioForoController {
               return;
          }
 
-         // Preparar los datos para el método create del modelo
          $commentData = [
              'foro_id' => $foroId, // Viene de la URL (validado)
              'autor_id' => $autorId, // Viene del cuerpo JSON (validado)
@@ -169,7 +148,6 @@ class ComentarioForoController {
         // Preparar datos para el método update del modelo
         $updateData = [
             'contenido' => trim($data->contenido)
-             // No permitimos actualizar foro_id o autor_id a través de este endpoint PUT por ID de comentario
         ];
 
         // Usar el método del modelo para actualizar el comentario
@@ -211,5 +189,4 @@ class ComentarioForoController {
         }
     }
 
-    // TODO: Implementar lógica de autenticación y autorización (ej: solo el autor o un admin puede actualizar/eliminar un comentario)
 }

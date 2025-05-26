@@ -1,12 +1,6 @@
 <?php
-// models/Noticias.php
-// Nota: Usando include_once aquí, consistente con el código original del usuario.
-// El campo autor_id ha sido eliminado del modelo y la tabla 'noticias'.
 
 include_once __DIR__ . '/../controllers/ControllerDatabase.php';
-// No se necesita incluir el modelo Usuarios aquí si el campo autor_id ha sido eliminado
-// y no hay otra relación directa con usuarios en este modelo.
-
 
 class Noticias {
     // Atributos
@@ -85,11 +79,6 @@ class Noticias {
         return $noticias;
     }
 
-    /**
-     * Gets the total count of news articles.
-     *
-     * @return int The total number of news articles.
-     */
     public static function getTotalNoticiasCount() {
         $db = ControllerDatabase::connect();
         if ($db === null) {
@@ -100,8 +89,7 @@ class Noticias {
         return (int) $stmt->fetchColumn(); // Cast to int
     }
 
-    // Mantener método find existente (Buscar una noticia por ID y devolver como array) - Actualizado para reflejar la ausencia de autor_id
-    // Ya es API-friendly
+ 
     public static function find($id): ?array {
         $connection = ControllerDatabase::connect();
         // Eliminar autor_id de la consulta SELECT
@@ -112,8 +100,7 @@ class Noticias {
         return $news ?: null; // Retorna null si no se encuentra
     }
 
-    // Mantener método findAll existente (Buscar todas las noticias como array) - Actualizado para reflejar la ausencia de autor_id
-    // Ya es API-friendly
+
     public static function findAll(): array {
         $connection = ControllerDatabase::connect();
         // Eliminar autor_id de la consulta SELECT
@@ -122,20 +109,14 @@ class Noticias {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Mantener Alias para compatibilidad - Llama al método findAll actualizado
     public static function getNoticias() {
-        // Este método ya retorna arrays porque llama a self::findAll()
         return self::findAll();
     }
 
-    // Mantener método create existente (Crear una nueva noticia) - Actualizado para reflejar la ausencia de autor_id
-    // NOTA: Este método, tal como está escrito, espera que TODOS los campos listados (excepto autor_id) estén en el array $data.
-    // Confiamos en que el controlador API proporcionará todos los campos requeridos.
-    // Retorna el ID del nuevo registro o false en caso de fallo.
+
     public static function create(array $data): int|false {
         $connection = ControllerDatabase::connect();
-        // Verificación básica si los campos esperados por este método están presentes (sin autor_id).
-        // La validación detallada y de campos requeridos es responsabilidad principal del controlador.
+
         if (!isset($data['titulo'], $data['descripcion'], $data['fecha_publicacion'], $data['url_origen'], $data['imagen'])) {
              // En un código robusto, se debería loggear o lanzar una excepción más específica.
              error_log("Error en Noticias::create: Faltan campos de datos requeridos para la firma del método (sin autor_id).");
@@ -167,9 +148,7 @@ class Noticias {
         }
     }
 
-    // MODIFIED: Actualizar una noticia existente (permite actualización parcial) - Actualizado para reflejar la ausencia de autor_id
-    // El método original requería todos los campos. Esta versión actualiza solo los campos presentes en $data.
-    // Retorna true en éxito (incluso si no hay filas afectadas), false en caso de fallo de DB o si no hay campos válidos.
+
     public static function update($id, array $data): bool {
         $connection = ControllerDatabase::connect();
 
@@ -181,8 +160,7 @@ class Noticias {
          $values = [];
 
          foreach ($allowedFields as $field) {
-            // Solo incluir campos presentes en el array de datos Y que están permitidos
-            // La validación de tipos/formatos específicos (ej: fecha) debería hacerse principalmente en el controlador
+
             if (isset($data[$field])) {
                 $updateFields[] = "`{$field}` = :{$field}"; // Usar placeholders nombrados para claridad y seguridad
                 $values[":{$field}"] = $data[$field]; // Almacenar el valor asociado con el placeholder
@@ -212,11 +190,7 @@ class Noticias {
          }
     }
 
-    // Keep existing delete method (Eliminar una noticia por ID)
-    // Retorna true en éxito (incluso si no hay filas afectadas), false en caso de fallo de DB.
-    // NOTA: Si otras tablas (ej: comentarios_noticia, likes_noticia) tienen claves foráneas que referencian noticias.id,
-    // DEBES manejar esas dependencias PRIMERO en el controlador (antes de llamar a Noticias::delete),
-    // o definir ON DELETE CASCADE en esas claves foráneas en tu esquema de base de datos.
+
     public static function delete($id): bool {
         $connection = ControllerDatabase::connect();
         $query = "DELETE FROM noticias WHERE id = ?";
@@ -232,9 +206,5 @@ class Noticias {
         }
     }
 
-    // --- MÉTODOS ELIMINADOS: findWithAuthor() y findAllWithAuthor() ---
-    // Estos métodos dependían de hacer un JOIN con la tabla 'usuarios' usando el campo 'autor_id'.
-    // Dado que el campo 'autor_id' ha sido eliminado de la tabla 'noticias', estos métodos ya no tienen
-    // un propósito relevante y han sido eliminados. Los métodos 'find()' y 'findAll()' existentes
-    // ya proporcionan la funcionalidad básica de obtener noticias como arrays asociativos.
+
 }

@@ -31,9 +31,7 @@ class Usuarios {
     public function setPassword($password) { $this->password = $password; }
     public function setRol($rol) { $this->rol = $rol; }
 
-    // Guardar el usuario en la base de datos
-    // Este método de instancia podría no usarse directamente en la API REST,
-    // pero es útil si creas una instancia de Usuario y luego la guardas.
+
     public function guardar() {
         $connection = ControllerDatabase::connect();
         $query = "INSERT INTO usuarios (nombre, email, password, rol) VALUES (?, ?, ?, ?)";
@@ -72,7 +70,6 @@ class Usuarios {
 
     public static function update($id, $data) {
         $connection = ControllerDatabase::connect();
-         // Construye la query dinámicamente para solo actualizar los campos presentes en $data
          $fields = [];
          $values = [];
          if (isset($data['nombre'])) {
@@ -88,8 +85,7 @@ class Usuarios {
              $fields[] = 'rol = ?';
              $values[] = $data['rol'];
          }
-          // Si quisieras actualizar password, necesitarías un método aparte
-          // y hashear la nueva password antes de pasarla aquí.
+   
 
          if (empty($fields)) {
              return false; // No hay campos para actualizar
@@ -142,8 +138,7 @@ class Usuarios {
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
-    // Estos métodos de token son útiles para sesiones o restablecimiento de contraseña,
-    // pero no son intrínsecos al funcionamiento básico de la API CRUD que hemos diseñado.
+
     public static function guardarToken($usuarioId, $token) {
         $connection = ControllerDatabase::connect();
         // Asegúrate de que tu tabla 'usuarios' tiene una columna 'token'
@@ -162,8 +157,7 @@ class Usuarios {
     }
 
      public static function esAdmin(int $userId): bool {
-        $user = self::obtenerPorId($userId); // Use the existing method to get user data
-        // Check if user exists and their 'rol' is 'admin'
+        $user = self::obtenerPorId($userId);
         return ($user && $user['rol'] === 'admin');
     }
 }

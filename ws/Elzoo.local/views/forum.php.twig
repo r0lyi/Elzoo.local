@@ -1,0 +1,52 @@
+<?php
+// Incluir la librería JWT para verificar el token
+include_once 'JWTController.php'; // Asegúrate de incluir la ruta correcta de tu archivo JWT.php
+
+// Verificar si el JWT está presente en las cookies
+if (!isset($_COOKIE['jwt'])) {
+    header("Location: login.php");
+    exit();
+}
+
+$jwt = $_COOKIE['jwt'];
+
+// Verificar si el JWT es válido
+if (!verificarJWT($jwt, 'mi_clave_secreta')) {
+    header("Location: login.php");
+    exit();
+}
+
+// Si el JWT es válido, podemos continuar y mostrar el contenido del foro
+?>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foro Comunitario</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h2 class="text-center">Foro Comunitario</h2>
+        
+        <div class="form-group">
+            <label for="postTitle">Título del post</label>
+            <input type="text" class="form-control" id="postTitle" placeholder="Introduce el título">
+        </div>
+        <div class="form-group">
+            <label for="postContent">Contenido</label>
+            <textarea class="form-control" id="postContent" rows="3"></textarea>
+        </div>
+        <button class="btn btn-primary">Publicar</button>
+
+        <h3 class="my-4">Publicaciones recientes</h3>
+        <!-- Mostrar publicaciones del foro aquí -->
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>

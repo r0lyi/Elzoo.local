@@ -26,10 +26,6 @@ function getAuthCookie() {
 
 
 
-// Borrar la cookie de autenticación
-//function deleteAuthCookie() {
- //   setcookie('auth_token', '', time() - 3600, '/', '', true, true); // Establecer un tiempo pasado para eliminarla
-//}
 
 function deleteAuthCookie() {
     if (isset($_COOKIE['auth_token'])) {

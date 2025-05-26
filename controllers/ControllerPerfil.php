@@ -12,7 +12,6 @@ function mostrarPerfil($isAjaxRequest = false) { // Added a parameter
     // Decodificar el JWT y obtener los datos del usuario
     $datos = decodificarJWT($jwt);
 
-    // Si el JWT o los datos son inválidos, redirigir al home (or handle specifically for AJAX)
     if (!$jwt || !$datos || !isset($datos['sub'])) {
         if ($isAjaxRequest) {
             http_response_code(401); // Unauthorized
@@ -24,10 +23,8 @@ function mostrarPerfil($isAjaxRequest = false) { // Added a parameter
         }
     }
 
-    // Obtener la información del usuario desde la base de datos usando su ID
     $usuario = Usuarios::obtenerPorId($datos['sub']);
 
-    // Si no se encuentra el usuario, redirigir al home (or handle specifically for AJAX)
     if (!$usuario) {
         if ($isAjaxRequest) {
             http_response_code(404); // Not Found
@@ -38,26 +35,19 @@ function mostrarPerfil($isAjaxRequest = false) { // Added a parameter
             exit;
         }
     }
-
-    // Pass 'isAjaxRequest' to the Twig renderer if it can use it for different layouts
-    // However, in this setup, 'perfil.html.twig' will always be rendered,
-    // and the JavaScript will extract the needed part.
+   
     renderView('perfil.html.twig', ['usuario' => $usuario]);
-    // The Twig rendering happens. The crucial part is that the JS then extracts only the #profile-card-content
-    // from the full HTML response.
+    
 }
 
 function cerrarSesion() {
-    // ... (Your existing cerrarSesion function remains unchanged) ...
-    // Obtener el JWT desde la cookie
+    
     $jwt = getAuthCookie();
 
-    // Si el JWT existe, eliminar el token de la base de datos y la cookie
     if ($jwt) {
         $datos = decodificarJWT($jwt);
 
         if ($datos && isset($datos['sub'])) {
-            // Eliminar el token de la base de datos
             Usuarios::eliminarTokenPorId($datos['sub']);
         }
 
