@@ -4,28 +4,128 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrarse - MyZoo</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         body {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh; /* Use min-height for better responsiveness */
             margin: 0;
-            background: linear-gradient(to bottom, #d2f7f1, #a3d9a5);
-            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom right, #a8e063, #56ab2f); /* More vibrant green gradient */
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; /* Modern font */
+            color: #333; /* Darker text for readability */
         }
-        .card {
+        .register-card {
             width: 100%;
-            max-width: 400px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
+            max-width: 420px; /* Slightly wider for better spacing */
+            background-color: #ffffff;
+            padding: 2.5rem; /* Increased padding */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); /* More pronounced shadow */
+            border-radius: 15px; /* Softer rounded corners */
+            animation: fadeIn 0.8s ease-out; /* Subtle entrance animation */
+        }
+        .register-card h2 {
+            font-weight: 700; /* Bolder title */
+            color: #28a745; /* Bootstrap success green */
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px; /* Space between icon and text */
+        }
+        .form-label {
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 0.5rem;
+        }
+        .form-control {
+            border-radius: 0.5rem; /* Rounded input fields */
+            border: 1px solid #ced4da;
+            padding: 0.75rem 1rem; /* More generous padding */
+            transition: all 0.3s ease;
+        }
+        .form-control:focus {
+            border-color: #28a745; /* Green focus highlight */
+            box-shadow: 0 0 0 0.25rem rgba(40, 167, 69, 0.25);
+        }
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+            padding: 0.75rem 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 0.75rem; /* More rounded button */
+            transition: background-color 0.2s, transform 0.2s;
+        }
+        .btn-success:hover {
+            background-color: #218838; /* Darker green on hover */
+            border-color: #1e7e34;
+            transform: translateY(-2px); /* Slight lift on hover */
+        }
+        .btn-outline-secondary { /* Style for the new "Back" button */
+            border-color: #6c757d;
+            color: #6c757d;
+            padding: 0.75rem 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 0.75rem;
+            transition: all 0.2s;
+        }
+        .btn-outline-secondary:hover {
+            background-color: #6c757d;
+            color: white;
+            transform: translateY(-2px);
+        }
+        .alert {
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .text-center.mt-3 a, .text-center.mt-4 a { /* Ensure consistent link styling */
+            color: #28a745; /* Green link color */
+            font-weight: 600;
+        }
+        .text-center.mt-3 a:hover, .text-center.mt-4 a:hover {
+            text-decoration: underline !important;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 576px) {
+            .register-card {
+                margin: 1.5rem; /* Add margin on smaller screens */
+                padding: 1.5rem;
+            }
+            .register-card h2 {
+                font-size: 1.8rem;
+            }
+            .form-control {
+                padding: 0.6rem 0.8rem;
+            }
+            .btn-success, .btn-outline-secondary {
+                padding: 0.6rem 1.2rem;
+                font-size: 1rem;
+            }
+        }
+
+        /* Animation Keyframes */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
 <body>
-    <div class="card p-4">
-        <h2 class="text-center mb-4">Crear una Cuenta</h2>
+    <div class="card register-card">
+        <h2 class="text-center">
+            <i class="fas fa-user-plus"></i> Registrarse
+        </h2>
 
         {% if mensaje %}
             <div class="alert {{ mensaje.tipo }} alert-dismissible fade show" role="alert">
@@ -37,25 +137,29 @@
         <form method="post" action="">
             <div class="mb-3">
                 <label for="nombre" class="form-label">Nombre de Usuario</label>
-                <input type="text" id="nombre" name="nombre" class="form-control" required placeholder="Ingresa tu nombre de usuario">
+                <input type="text" id="nombre" name="nombre" class="form-control" required placeholder="Ingresa tu nombre de usuario" autocomplete="username">
             </div>
             <div class="mb-3">
                 <label for="correo" class="form-label">Correo Electrónico</label>
-                <input type="email" id="correo" name="correo" class="form-control" required placeholder="ejemplo@correo.com">
+                <input type="email" id="correo" name="correo" class="form-control" required placeholder="ejemplo@correo.com" autocomplete="email">
             </div>
             <div class="mb-3">
                 <label for="contraseña" class="form-label">Contraseña</label>
-                <input type="password" id="contraseña" name="contraseña" class="form-control" required placeholder="Ingresa tu contraseña">
+                <input type="password" id="contraseña" name="contraseña" class="form-control" required placeholder="Ingresa tu contraseña" autocomplete="new-password">
             </div>
 
-            <div class="d-grid">
-                <button type="submit" class="btn btn-success">Registrar</button>
+            <div class="d-grid gap-2 mt-4"> {# Added gap-2 for spacing between buttons #}
+                <button type="submit" class="btn btn-success">Crear Cuenta</button>
+                <a href="/" class="btn btn-outline-secondary">
+                    <i class="fas fa-times-circle me-2"></i> Cancelar
+                </a>
             </div>
         </form>
-        <p class="text-center mt-3">
+        <p class="text-center mt-4">
             ¿Ya tienes una cuenta? <a href="/login" class="text-decoration-none">Iniciar Sesión</a>
         </p>
     </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-            </body>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigF/n/Q9IqV/Dli" crossorigin="anonymous"></script>
+</body>
 </html>

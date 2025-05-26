@@ -56,19 +56,21 @@ class Noticias {
     // El método setAutorId() ha sido eliminado
 
     // Mantener método listNoticias existente (retorna OBJETOS Noticias) - Actualizado para reflejar la ausencia de autor_id
-    public static function listNoticias() {
+    public static function listNoticias($limit = 12, $offset = 0) { // Default to 7 news per page
         $db = ControllerDatabase::connect();
         if ($db === null) {
             return [];
         }
 
-        // Eliminar autor_id de la consulta SELECT
-        $stmt = $db->query("SELECT id, titulo, descripcion, fecha_publicacion, url_origen, imagen FROM noticias ORDER BY fecha_publicacion DESC");
+        // Use LIMIT and OFFSET in the SQL query for pagination
+        $stmt = $db->prepare("SELECT id, titulo, descripcion, fecha_publicacion, url_origen, imagen FROM noticias ORDER BY fecha_publicacion DESC LIMIT :limit OFFSET :offset");
+        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
         $noticiasData = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         $noticias = [];
         foreach ($noticiasData as $noticiaData) {
-            // Usando el constructor actualizado (sin el parámetro autor_id)
             $noticia = new Noticias(
                 $noticiaData['id'],
                 $noticiaData['titulo'],
@@ -76,12 +78,26 @@ class Noticias {
                 $noticiaData['fecha_publicacion'],
                 $noticiaData['url_origen'],
                 $noticiaData['imagen']
-                // El parámetro autor_id ha sido eliminado
             );
             $noticias[] = $noticia;
         }
 
         return $noticias;
+    }
+
+    /**
+     * Gets the total count of news articles.
+     *
+     * @return int The total number of news articles.
+     */
+    public static function getTotalNoticiasCount() {
+        $db = ControllerDatabase::connect();
+        if ($db === null) {
+            return 0;
+        }
+
+        $stmt = $db->query("SELECT COUNT(*) FROM noticias");
+        return (int) $stmt->fetchColumn(); // Cast to int
     }
 
     // Mantener método find existente (Buscar una noticia por ID y devolver como array) - Actualizado para reflejar la ausencia de autor_id

@@ -29,11 +29,10 @@ class ComentarioForo {
 
     // Mantener método 'crear' existente (retorna bool)
     // Crear nuevo comentario (usando parámetros específicos)
-    public static function crear(int $foroId, int $autorId, string $contenido): bool {
+  public static function crear(int $foroId, int $autorId, string $contenido): bool {
         $db = ControllerDatabase::connect();
         $sql = "INSERT INTO comentarios_foro (foro_id, autor_id, contenido) VALUES (:foro_id, :autor_id, :contenido)";
         $stmt = $db->prepare($sql);
-        // Nota: Este método no retorna el nuevo ID
         return $stmt->execute([
             ':foro_id'  => $foroId,
             ':autor_id' => $autorId,
@@ -41,13 +40,12 @@ class ComentarioForo {
         ]);
     }
 
-    // Mantener método 'obtenerPorForoId' existente (retorna OBJETOS ComentarioForo)
-    // Obtener comentarios por foro (Retorna OBJETOS ComentarioForo)
     public static function obtenerPorForoId(int $foroId): array {
         $db = ControllerDatabase::connect();
         $stmt = $db->prepare("SELECT * FROM comentarios_foro WHERE foro_id = :foro_id ORDER BY fecha_creacion ASC");
         $stmt->execute([':foro_id' => $foroId]);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // This maps raw data to ComentarioForo objects, which is what we need.
         return array_map(fn($data) => new ComentarioForo($data), $rows);
     }
 

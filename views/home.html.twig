@@ -3,88 +3,241 @@
 {% block title %}Inicio - Noticias del Zoológico{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <header class="text-center mb-4 animate__animated animate__fadeInDown">
-        <h1 class="fw-bold">Bienvenido a nuestro Zoológico</h1>
-        <p class="lead">Descubre las últimas noticias y actualizaciones sobre el reino animal.</p>
+<div class="container my-5">
+    {# Hero Section - A welcoming and visually appealing header for the page #}
+    <header class="text-center mb-5 py-4 bg-success bg-gradient text-white rounded-3 shadow-lg animate__animated animate__fadeInDown">
+        <h1 class="display-4 fw-bold mb-3">
+            <i class="fas fa-paw me-2"></i>Bienvenido a Nuestro Zoológico
+        </h1>
+        <p class="lead">Descubre las últimas noticias y actualizaciones sobre el fascinante reino animal.</p>
+        <hr class="w-25 mx-auto border-white">
+        <a href="#latest-news-section" class="btn btn-light btn-lg mt-3 shadow-sm">
+            Explorar Noticias <i class="fas fa-arrow-down ms-2"></i>
+        </a>
     </header>
 
-    <section class="latest-news">
-        <h2 class="text-center mb-4 animate__animated animate__zoomIn">Últimas Noticias</h2>
-        
-        {% for noticia in noticias %}
-    <div class="col-sm-12 col-md-6 col-lg-4 mb-4 animate__animated animate__fadeInUp" style="animation-delay: {{ loop.index * 0.2 }}s">
-        <div class="card h-100 shadow-sm">
-            <img src="{{ noticia.imagen ?: '/path/to/default-image.jpg' }}" class="card-img-top img-fluid" alt="Imagen de {{ noticia.titulo }}">
-            <div class="card-body d-flex flex-column justify-content-between">
-                <div>
-                    <h5 class="card-title">
-                        <a href="{{ noticia.url_origen }}" target="_blank" class="text-decoration-none text-success">
-                            {{ noticia.titulo }}
-                        </a>
-                    </h5>
-                    <p class="card-text text-highlight">
-                        🐾 {{ noticia.descripcion|length > 500 ? noticia.descripcion[:200] ~ '...' : noticia.descripcion }}
-                    </p>
-                </div>
-                <div class="mt-3">
-                    <p class="text-muted mb-1"><i class="bi bi-calendar-event"></i> Publicado el: {{ noticia.fecha_publicacion|date("d/m/Y") }}</p>
-                    {# Si deseas mostrar el autor y tienes el nombre, reemplaza el siguiente texto por la propiedad adecuada #}
-                    {# <p class="text-muted"><i class="bi bi-person-circle"></i> Autor: {{ noticia.autor.nombre }}</p> #}
+    {# Latest News Section - Displays the news articles, leveraging Bootstrap's grid for responsiveness #}
+    <section id="latest-news-section" class="latest-news">
+        <h2 class="text-center mb-5 text-success animate__animated animate__zoomIn">
+            <i class="fas fa-newspaper me-2"></i>Últimas Noticias
+        </h2>
+
+        {% if noticias is not empty %}
+        {# Bootstrap grid for responsive card layout:
+           - 1 column on extra small screens (col-12 by default for 'col')
+           - 2 columns on medium screens (md)
+           - 3 columns on large screens (lg)
+           - g-4 adds consistent spacing (gutter) between cards #}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for noticia in noticias %}
+            {# Each column for a news card, with animation and staggered delay #}
+            <div class="col animate__animated animate__fadeInUp" style="animation-delay: {{ loop.index * 0.15 }}s">
+                <div class="card h-100 shadow-sm border-0 transform-on-hover">
+                    {# News Image - Displays the news image, with a fallback placeholder #}
+                    <img src="{{ noticia.imagen ?: 'https://via.placeholder.com/600x400?text=Imagen+No+Disponible' }}" class="card-img-top news-card-img" alt="Imagen de {{ noticia.titulo }}">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title mb-3">
+                            {# News Title & Link to Original Source:
+                               - `href="{{ noticia.url_origen }}"`: The direct link to the external news article.
+                               - `target="_blank"`: Opens the link in a new browser tab.
+                               - `rel="noopener noreferrer"`: Important for security and performance when using `target="_blank"`.
+                               - `stretched-link`: Makes the entire card area clickable via this link. #}
+                            <a href="{{ noticia.url_origen }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-dark stretched-link">
+                                {{ noticia.titulo|length > 70 ? noticia.titulo[:70] ~ '...' : noticia.titulo }}
+                            </a>
+                        </h5>
+                        {# News Description - Truncates long descriptions for cleaner display #}
+                        <p class="card-text text-muted flex-grow-1">
+                            {{ noticia.descripcion|striptags|length > 150 ? noticia.descripcion|striptags[:150] ~ '...' : noticia.descripcion|striptags }}
+                        </p>
+                        {# Metadata: Publication Date and optional Author #}
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <small class="text-muted">
+                                <i class="far fa-calendar-alt me-1"></i> {{ noticia.fecha_publicacion|date("d/m/Y") }}
+                            </small>
+                            {% if noticia.autor is defined and noticia.autor is not empty %}
+                            <small class="text-muted">
+                                <i class="fas fa-user-circle me-1"></i> {{ noticia.autor }}
+                            </small>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
             </div>
+            {% endfor %}
         </div>
-    </div>
-{% endfor %}
-            <p class="text-center animate__animated animate__fadeInUp">No hay noticias disponibles en este momento.</p>
+
+        {# Pagination Controls - Allows users to navigate through news pages #}
+        <nav aria-label="Navegación de noticias" class="mt-5 d-flex justify-content-center animate__animated animate__fadeInUp">
+            <ul class="pagination">
+                {# Previous Button: Disabled if on the first page #}
+                <li class="page-item {% if currentPage == 1 %}disabled{% endif %}">
+                    <a class="page-link" href="?page={{ currentPage - 1 }}" aria-label="Anterior">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+
+                {# Page Numbers: Loops through all available pages #}
+                {% for i in 1..totalPages %}
+                <li class="page-item {% if currentPage == i %}active{% endif %}">
+                    <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                </li>
+                {% endfor %}
+
+                {# Next Button: Disabled if on the last page #}
+                <li class="page-item {% if currentPage == totalPages %}disabled{% endif %}">
+                    <a class="page-link" href="?page={{ currentPage + 1 }}" aria-label="Siguiente">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        {% else %}
+        {# Message displayed if no news articles are found #}
+        <div class="alert alert-info text-center animate__animated animate__fadeInUp" role="alert">
+            <i class="fas fa-info-circle me-2"></i> No hay noticias disponibles en este momento. ¡Vuelve pronto!
+        </div>
+        {% endif %}
     </section>
 </div>
 
+{# Custom Styles - Enhances the visual appeal and ensures responsiveness #}
 <style>
     body {
-        background-color: #eef7e9;
+        background-color: #f8f9fa; /* Light grey background for a clean look */
+        font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; /* Modern, readable font stack */
     }
 
+    .container {
+        max-width: 1200px; /* Limits content width for better readability on large screens */
+    }
+
+    /* Header (Hero Section) Styling */
+    header {
+        background: linear-gradient(to right, #4CAF50, #8BC34A); /* Vibrant green gradient */
+    }
+
+    header h1 {
+        font-size: 2.8rem;
+        color: #fff;
+    }
+
+    header p.lead {
+        font-size: 1.25rem;
+        color: #e0e0e0;
+    }
+
+    .btn-light {
+        color: #4CAF50;
+        border-color: #4CAF50;
+    }
+
+    .btn-light:hover {
+        background-color: #e9ecef;
+        color: #388E3C;
+    }
+
+    /* News Card Styling */
     .card {
-        border-radius: 15px;
-        overflow: hidden;
-        transition: transform 0.3s, box-shadow 0.3s;
+        border-radius: 12px; /* Rounded corners for a softer aesthetic */
+        overflow: hidden; /* Ensures content respects border-radius */
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); /* Subtle shadow for depth */
+        transition: all 0.3s ease-in-out; /* Smooth transitions for hover effects */
     }
 
-    .card:hover {
-        transform: scale(1.05);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    .transform-on-hover:hover {
+        transform: translateY(-8px) scale(1.02); /* Lifts and slightly scales the card on hover */
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); /* More prominent shadow on hover */
     }
 
-    .card-img-top {
-        height: 200px;
-        object-fit: cover;
+    .news-card-img {
+        height: 220px; /* Fixed height for image consistency across cards */
+        object-fit: cover; /* Ensures images cover the area without distortion */
+        width: 100%;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
     }
 
-    .card-title {
-        color: #2c5f2d;
-        font-weight: bold;
+    .card-title a {
+        font-weight: 600;
+        color: #343a40; /* Darker text for titles for good contrast */
+        transition: color 0.2s ease-in-out;
     }
 
-    .text-highlight {
-        background-color: #fff6e0;
-        padding: 10px;
-        border-radius: 10px;
-        font-size: 1rem;
-        font-weight: bold;
-        color: #4b5320;
+    .card-title a:hover {
+        color: #4CAF50; /* Green on hover for interactive feedback */
     }
 
-    @media (max-width: 576px) {
-        h1 {
+    .card-text {
+        color: #555;
+        line-height: 1.6;
+        font-size: 0.95rem;
+    }
+
+    .text-muted {
+        font-size: 0.85rem;
+    }
+
+    /* Pagination Styling */
+    .pagination .page-item .page-link {
+        color: #4CAF50; /* Green text for pagination links */
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+        margin: 0 2px;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #4CAF50; /* Solid green background for the active page */
+        border-color: #4CAF50;
+        color: white;
+    }
+
+    .pagination .page-item.disabled .page-link {
+        color: #6c757d; /* Greyed out for disabled links */
+    }
+
+    /* Animations (Ensure Animate.css is linked in base.html.twig) */
+    .animate__animated {
+        animation-duration: 0.8s;
+        animation-fill-mode: both;
+    }
+
+    /* Responsive Adjustments (Media Queries) */
+    @media (max-width: 768px) { /* Adjustments for tablets and smaller desktops */
+        header h1 {
+            font-size: 2.2rem;
+        }
+        header p.lead {
+            font-size: 1rem;
+        }
+        .news-card-img {
+            height: 180px;
+        }
+    }
+
+    @media (max-width: 576px) { /* Adjustments for mobile devices */
+        header {
+            padding: 2rem 1rem;
+        }
+        header h1 {
             font-size: 1.8rem;
         }
-        .text-highlight {
+        header p.lead {
             font-size: 0.9rem;
-            padding: 8px;
         }
-        .card-img-top {
+        .news-card-img {
             height: 150px;
+        }
+        .card-title a {
+            font-size: 1.1rem;
+        }
+        .card-text {
+            font-size: 0.85rem;
+        }
+        .pagination {
+            flex-wrap: wrap; /* Allows pagination items to wrap onto multiple lines */
+            justify-content: center; /* Centers pagination items */
         }
     }
 </style>

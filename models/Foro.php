@@ -56,7 +56,6 @@ class Foro {
     }
 
     public function obtenerComentarios(): array {
-        // ATENCIÓN: Cambiado a singular, asumiendo que tu modelo de comentarios es 'ComentarioForo'
         return ComentarioForo::obtenerPorForoId($this->id);
     }
 
