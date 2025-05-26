@@ -1,71 +1,91 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ foro.titulo }} – Foro{% endblock %}
+{% block title %}{{ foro.titulo }} - Foro Comunidad Zoológica{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-  <article class="card shadow-sm mb-5">
-    <div class="card-body">
-      <h2 class="card-title">{{ foro.titulo }}</h2>
-      <p class="text-muted">
-        Publicado por <strong>{{ foro.autor_nombre }}</strong>
-        el {{ foro.fecha_creacion|date('d/m/Y H:i') }}
-      </p>
-      <div class="mt-4">
-        {{ foro.contenido|nl2br }}
-      </div>
-    </div>
-  </article>
-
-  <section class="add-comment mb-5 card shadow-sm border-0 animate__animated animate__fadeIn">
-    {# ... (card header) ... #}
-    <div class="card-body p-4">
-        {% if is_authenticated %}
-            {# Form action correctly points to the current forum's detail URL #}
-            <form action="/foros/{{ foro.id }}" method="POST">
-                <div class="mb-3">
-                    <label for="contenidoComentario" class="form-label fw-bold">Tu Comentario</label>
-                    <textarea
-                        id="contenidoComentario"
-                        name="contenido" {# This name is crucial for $_POST['contenido'] #}
-                        class="form-control"
-                        rows="4"
-                        placeholder="Escribe tu comentario aquí..."
-                        required
-                    ></textarea>
-                </div>
-                <button type="submit" class="btn btn-success btn-lg w-100">
-                    <i class="fas fa-paper-plane me-2"></i> Publicar Comentario
-                </button>
-            </form>
-        {% else %}
-            <div class="alert alert-info text-center" role="alert">
-                Para comentar, por favor <a href="/login" class="alert-link fw-bold">inicia sesión</a>.
+<div class="container my-5">
+    {# Main Forum Post Article #}
+    <article class="card shadow-lg border-0 mb-5 animate__animated animate__fadeInDown">
+        <div class="card-body p-4">
+            <h1 class="card-title display-4 fw-bold text-dark mb-3">{{ foro.titulo }}</h1>
+            <p class="text-muted small mb-4">
+                Publicado por <strong>{{ foro.autor_nombre }}</strong>
+                el {{ foro.fecha_creacion|date('d/m/Y H:i') }}
+            </p>
+            <div class="mt-4 fs-5 text-dark">
+                {{ foro.contenido|nl2br }} {# nl2br converts newlines to <br> for display #}
             </div>
-        {% endif %}
-    </div>
-</section>
-
-  {% if is_authenticated %}
-    <section class="crear-comentario mb-5">
-      <h4 class="mb-3">Añadir comentario</h4>
-      <form action="/forum/{{ foro.id }}/comentario" method="POST">
-        <div class="mb-3">
-          <textarea
-            name="contenido"
-            class="form-control"
-            rows="4"
-            placeholder="Tu comentario..."
-            required
-          ></textarea>
         </div>
-        <button type="submit" class="btn btn-primary">Comentar</button>
-      </form>
+    </article>
+
+    {# Message Area (e.g., success/error after comment submission) #}
+    {% if message %}
+        <div id="message-area" class="alert alert-{{ message.type }} alert-dismissible fade show animate__animated animate__fadeIn" role="alert">
+            {{ message.text }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endif %}
+
+    ---
+
+    {# Single Comment Submission Form #}
+    <section class="add-comment mb-5 card shadow-sm border-0 animate__animated animate__fadeInUp">
+        <div class="card-header bg-gradient-success text-white py-3">
+            <h2 class="card-title h4 mb-0 d-flex align-items-center">
+                <i class="fas fa-comment-dots me-2"></i> Añadir un Comentario
+            </h2>
+        </div>
+        <div class="card-body p-4">
+            {% if is_authenticated %}
+                <form action="/foros/{{ foro.id }}" method="POST">
+                    <div class="mb-3">
+                        <label for="contenidoComentario" class="form-label fw-bold">Tu Comentario</label>
+                        <textarea
+                            id="contenidoComentario"
+                            name="contenido" {# This name is crucial for $_POST['contenido'] #}
+                            class="form-control"
+                            rows="4"
+                            placeholder="Escribe tu comentario aquí..."
+                            required
+                        ></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success btn-lg w-100">
+                        <i class="fas fa-paper-plane me-2"></i> Publicar Comentario
+                    </button>
+                </form>
+            {% else %}
+                <div class="alert alert-info text-center" role="alert">
+                    Para comentar, por favor <a href="/login" class="alert-link fw-bold">inicia sesión</a>.
+                </div>
+            {% endif %}
+        </div>
     </section>
-  {% else %}
-    <div class="alert alert-warning">
-      Debes iniciar sesión para comentar.
+
+    ---
+
+    {# List of Comments Section #}
+    <section class="comment-list mt-5">
+        <h2 class="text-center mb-4 display-5 fw-bold text-info animate__animated animate__zoomIn">Comentarios ({{ comentarios|length }})</h2>
+
+        {% if comentarios|length > 0 %}
+            <div class="list-group">
+                {% for comentario in comentarios %}
+                    <div class="list-group-item list-group-item-action mb-3 shadow-sm border-0 animate__animated animate__fadeInUp">
+                        <div class="d-flex w-100 justify-content-between align-items-center">
+                            <h5 class="mb-1 text-primary">{{ comentario.autor_nombre }}</h5>
+                            <small class="text-muted">{{ comentario.fecha_creacion|date('d/m/Y H:i') }}</small>
+                        </div>
+                        <p class="mb-1 mt-2 text-dark">{{ comentario.contenido|nl2br }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-center text-muted animate__animated animate__fadeIn">No hay comentarios aún. ¡Sé el primero en comentar!</p>
+        {% endif %}
+    </section>
+
+    <div class="text-center mt-5">
+        <a href="/foros" class="btn btn-outline-secondary btn-lg animate__animated animate__pulse animate__infinite"><i class="fas fa-arrow-left me-2"></i> Volver al Foro</a>
     </div>
-  {% endif %}
 </div>
 {% endblock %}

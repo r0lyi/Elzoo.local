@@ -85,13 +85,6 @@ switch ($resource) {
         $foroId = $segment2; // Foro ID (could be null for /foros)
         $subResource = $segment3; // 'comentarios' or null
 
-        // --- Handle /api/v1/foros and /api/v1/foros/{id} ---
-        // This block covers:
-        // - GET /api/v1/foros (with optional query parameters for filtering)
-        // - POST /api/v1/foros
-        // - GET /api/v1/foros/{id}
-        // - PUT /api/v1/foros/{id}
-        // - DELETE /api/v1/foros/{id}
         if (!$subResource && count($apiSegments) <= 2) {
              // Validate if segment2 is a numeric ID or if it's not present (for /foros)
              if ($foroId !== null && !is_numeric($foroId)) {
