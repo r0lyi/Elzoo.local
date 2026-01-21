@@ -2,7 +2,7 @@
 
 ¡Bienvenido a `Elzoo.local`\! Este proyecto es una aplicación web sencilla y modular diseñada para simular una comunidad zoológica. Permite a los visitantes explorar información sobre animales, estar al día con las últimas noticias del zoo, y participar en un foro interactivo. Los usuarios registrados pueden contribuir al foro, mientras que los administradores tienen control total sobre el contenido del sitio.
 
-Para una documentación técnica detallada sobre la arquitectura, la base de datos y la configuración avanzada, consulta el [**Directorio de Documentación**](https://www.google.com/search?q=DOCUMENTACION.md).
+Para una documentación técnica detallada sobre la arquitectura, la base de datos y la configuración avanzada, consulta el [**Directorio de Documentación**](DOCUMENTACION.md).
 
 ---
 
