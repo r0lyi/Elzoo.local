@@ -1,0 +1,59 @@
+# Dependencias de Composer
+/vendor/
+/composer.phar
+composer.lock
+
+# Archivos de entorno
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+log/
+
+# Caché (Twig y app)
+cache/
+var/cache/
+tmp/
+temp/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# IDEs y editores
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# PHP Storm
+/.phpunit.result.cache
+
+# PHPUnit
+phpunit.xml
+phpunit.result.cache
+
+# Uploads (si los tienes locales)
+uploads/
+public/uploads/
+
+# Archivos compilados o temporales
+*.cache
+*.tmp
+
+# Twig cache específico (si lo separas)
+templates/cache/
+
+# Docker (si en algún momento lo usas)
+docker-compose.override.yml
+
+# Node (por si añades frontend tooling)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dist/
+build/
